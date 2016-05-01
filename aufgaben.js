@@ -4,6 +4,7 @@ fs.readFile('wolkenkratzer.json', 'utf-8', function(err, data) {
 		return;
 	}
 	else{
+		//Aus data wird ein JSON String
 		data = JSON.parse(data);
 		//console.log(data);
 		for (var i = 0; i < data.wolkenkratzer.length; i++) {
