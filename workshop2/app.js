@@ -16,29 +16,25 @@ app.post('/dice',jsonParser,function(req,res){
 });
 
 app.get('/gamefield',function (req,res) {
-        res.format({
-         'image/jpeg':function(){
-            res.sendFile('/gamefield.jpg');
-        }   
-     })    
-    res.writeHead(200, "OK");
-    res.end();
+  res.sendFile(__dirname+'/gamefield/gamefield.jpg', function (err){
+     if(err) {
+          console.log(err);
+      }
+      else{
+          console.log("Datei geschickt!");
+      }
+      res.end();
+  });
 });
 
-app.get('.',function (req,res) {
-        res.format({
-         'text/html':function(){
-        }   
-     })    
-    res.writeHead(200, "OK");
-    res.sendFile(path.join(__dirname+'./index.html'));
-    //res.sendFile('./index.html', function (err){
-    //   if(err) {
-    //        console.log(err);
-    //    }
-    //    else{
-    //        console.log("Datei geschickt!");
-    //    }
-    //    res.end();
-    //});
+app.get('/',function (req,res) {
+    res.sendFile(__dirname+'/index.html', function (err){
+       if(err) {
+            console.log(err);
+        }
+        else{
+            console.log("Datei geschickt!");
+        }
+        res.end();
+    });
 });
