@@ -28,6 +28,46 @@ app.get('/gamefield',function (req,res) {
   });
 });
 
+app.get('/gamefield',function (req,res) {
+  switch (figurecolor) {
+    case "red":
+                res.sendFile(__dirname+'/gamefield/figure_red.jpg', function (err){
+                   if(err) {
+                        console.log(err);
+                    }
+                    else{
+                        console.log("Datei geschickt!");
+                    }
+                    res.end();
+                )};
+                  break;
+     case "blue":
+                  res.sendFile(__dirname+'/gamefield/figure_blue.jpg', function (err){
+                     if(err) {
+                          console.log(err);
+                      }
+                      else{
+                          console.log("Datei geschickt!");
+                      }
+                      res.end();
+                  )};
+                  break;    
+  };
+};
+
+app.get('/rules',function (req,res) {
+  res.sendFile(__dirname+'/rules/rules.html', function (err){
+     if(err) {
+          console.log(err);
+      }
+      else{
+          console.log("Datei geschickt!");
+      }
+      res.end();
+  });
+});
+
+
 app.get('/',function (req,res) {
     res.sendFile(__dirname+'/index.html', function (err){
        if(err) {
