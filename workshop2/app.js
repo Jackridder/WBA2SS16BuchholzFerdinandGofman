@@ -19,6 +19,7 @@ app.get('/gamefield',function (req,res) {
   res.sendFile(__dirname+'/gamefield/gamefield.jpg', function (err){
      if(err) {
           console.log(err);
+          res.status(404).end("Datei nich gefunden");
       }
       else{
           console.log("Datei geschickt!");
