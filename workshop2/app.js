@@ -11,18 +11,13 @@ app.use(jsonParser);
 
 var curUserId = 0;
 var lastDice = 0;
-var possibleMoves = Array(56); // 40 Normal + 16 Ende
+var possibleMoves = Array(40); // 40 Normal
+var goal;
 
 app.post('/dice',jsonParser,function (req,res){
     curUserId = req.body.id;
     lastDice = Math.round(Math.random() * (6 - 1) + 1);
     res.end(lastDice.toString());
-});
-
-app.post('/move',jsonParser,function (req,res){
-    if(possibleMoves.contains(req.body.fieldid)) //Falls Spielzug möglich
-      possibleMoves.splice(req.body.fieldid,1) // Erlaube Spielzug und entferne aus Möglichen
-
 });
 
 app.get('/gamefield',function (req,res) {
@@ -38,9 +33,45 @@ app.get('/gamefield',function (req,res) {
   });
 });
 
+app.get('/gamefield/neutral',function (req,res) {
+  if(possibleMoves[req.body.fieldid]){ //Falls Spielzug möglich
+      possibleMoves[req.body.fieldif] = 0
+      res.end(true);
+  }// Erlaube Spielzug und entferne aus Möglichen
+  else {
+    res.end(false);
+  }
+});
+
+app.get('/gamefield/home',function (req,res) {
+    if(req.body.dice == 6){ // Anfangsfeld überprüfen
+      if(possibleMoves[req.body.id*10]){ //Falls Anfangsfeld frei
+        res.send(true)
+      } else {
+        res.send(false);
+      }
+    }else{
+      if(possibleMoves[req.body.fieldid]){
+        res.send(true)
+      } else {
+        res.send(false);
+      }
+    }
+});
+
+app.get('/gamefield/goal',function (req,res) {
+    for(i=0;i<4;i++){
+      for(j=0;j<4;j++){
+        if(goal[i][j]==0)
+          res.end(i);
+      }
+    }
+    res.end();
+});
+
 app.get('/spielfigur',function (req,res) {
   switch (req.body.id) {
-    case "1":
+    case "0":
                 res.sendFile(__dirname+'/spielfigur/figure_red.jpg', function (err){
                    if(err) {
                         console.log(err);
@@ -51,7 +82,7 @@ app.get('/spielfigur',function (req,res) {
                     res.end();
                 )};
                 break;
-    case "2":
+    case "1":
                 res.sendFile(__dirname+'/spielfigur/figure_blue.jpg', function (err){
                    if(err) {
                         console.log(err);
@@ -62,7 +93,7 @@ app.get('/spielfigur',function (req,res) {
                     res.end();
                 )};
                 break;
-    case "3":
+    case "2":
                 res.sendFile(__dirname+'/spielfigur/figure_green.jpg', function (err){
                    if(err) {
                         console.log(err);
@@ -73,7 +104,7 @@ app.get('/spielfigur',function (req,res) {
                     res.end();
                 )};
                 break;
-    case "4":
+    case "3":
                 res.sendFile(__dirname+'/spielfigur/figure_yellow.jpg', function (err){
                    if(err) {
                         console.log(err);
