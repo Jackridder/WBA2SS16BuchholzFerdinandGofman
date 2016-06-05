@@ -87,7 +87,7 @@ app.get('/spielfigur',function (req,res) {
 };
 
 app.get('/rules',function (req,res) {
-  res.sendFile(__dirname+'/rules/rules.json', function (err){
+  res.sendFile(__dirname+'/rules/rules.html', function (err){
      if(err) {
           console.log(err);
       }
