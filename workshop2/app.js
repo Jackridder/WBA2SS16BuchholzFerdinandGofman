@@ -9,10 +9,20 @@ app.listen(3000,function(){
 var jsonParser = bodyParser.json();
 app.use(jsonParser);
 
-app.post('/dice',jsonParser,function(req,res){
-    var id = req.body.id;
-    var randNumber = Math.round(Math.random() * (6 - 1) + 1);
-    res.end(randNumber.toString());
+var curUserId = 0;
+var lastDice = 0;
+var possibleMoves = Array(56); // 40 Normal + 16 Ende
+
+app.post('/dice',jsonParser,function (req,res){
+    curUserId = req.body.id;
+    lastDice = Math.round(Math.random() * (6 - 1) + 1);
+    res.end(lastDice.toString());
+});
+
+app.post('/move',jsonParser,function (req,res){
+    if(possibleMoves.contains(req.body.fieldid)) //Falls Spielzug möglich
+      possibleMoves.splice(req.body.fieldid,1) // Erlaube Spielzug und entferne aus Möglichen
+
 });
 
 app.get('/gamefield',function (req,res) {
@@ -28,10 +38,10 @@ app.get('/gamefield',function (req,res) {
   });
 });
 
-app.get('/gamefield',function (req,res) {
-  switch (figurecolor) {
-    case "red":
-                res.sendFile(__dirname+'/gamefield/figure_red.jpg', function (err){
+app.get('/spielfigur',function (req,res) {
+  switch (req.body.id) {
+    case "1":
+                res.sendFile(__dirname+'/spielfigur/figure_red.jpg', function (err){
                    if(err) {
                         console.log(err);
                     }
@@ -40,23 +50,44 @@ app.get('/gamefield',function (req,res) {
                     }
                     res.end();
                 )};
-                  break;
-     case "blue":
-                  res.sendFile(__dirname+'/gamefield/figure_blue.jpg', function (err){
-                     if(err) {
-                          console.log(err);
-                      }
-                      else{
-                          console.log("Datei geschickt!");
-                      }
-                      res.end();
-                  )};
-                  break;    
-  };
+                break;
+    case "2":
+                res.sendFile(__dirname+'/spielfigur/figure_blue.jpg', function (err){
+                   if(err) {
+                        console.log(err);
+                    }
+                    else{
+                        console.log("Datei geschickt!");
+                    }
+                    res.end();
+                )};
+                break;
+    case "3":
+                res.sendFile(__dirname+'/spielfigur/figure_green.jpg', function (err){
+                   if(err) {
+                        console.log(err);
+                    }
+                    else{
+                        console.log("Datei geschickt!");
+                    }
+                    res.end();
+                )};
+                break;
+    case "4":
+                res.sendFile(__dirname+'/spielfigur/figure_yellow.jpg', function (err){
+                   if(err) {
+                        console.log(err);
+                    }
+                    else{
+                        console.log("Datei geschickt!");
+                    }
+                    res.end();
+                )};
+                break;
 };
 
 app.get('/rules',function (req,res) {
-  res.sendFile(__dirname+'/rules/rules.html', function (err){
+  res.sendFile(__dirname+'/rules/rules.json', function (err){
      if(err) {
           console.log(err);
       }
@@ -66,6 +97,7 @@ app.get('/rules',function (req,res) {
       res.end();
   });
 });
+
 
 
 app.get('/',function (req,res) {
