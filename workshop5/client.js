@@ -1,5 +1,7 @@
-var clientID;
 var app = require('http');
+var bodyParser = require('body-parser');
+var jsonParser = bodyParser.json();
+
 var optionsGET = {
   host: 'localhost',
   port: 3000,
@@ -20,10 +22,13 @@ var optionsPOST = {
   }
 }
 
+var clientID;
+
 optionsPOST.path = '/Spielfigur';
 var postSpielfigur = http.request(optionsPOST, function(res){
   console.log("Spieler hat sich verbunden");
   res.on('data',function(){
+    ClientID = jsonParser(data);
     console.log(res);
   });
 });
