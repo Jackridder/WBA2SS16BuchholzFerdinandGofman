@@ -30,7 +30,7 @@ var postSpielfigur = http.request(options, function(res){
 postSpielfigur.end();
 
 options.path = '/gamefield';
-setTimeout(http.request(options,function(res){
-
+setTimeout(http.request(optionsGET,function(res){
+  
 }), 10000);
 end();
