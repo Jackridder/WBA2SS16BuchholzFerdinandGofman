@@ -21,7 +21,7 @@ var optionsPOST = {
 }
 
 optionsPOST.path = '/Spielfigur';
-var postSpielfigur = http.request(options, function(res){
+var postSpielfigur = http.request(optionsPOST, function(res){
   console.log("Spieler hat sich verbunden");
   res.on('data',function(){
     console.log(res);
@@ -31,6 +31,8 @@ postSpielfigur.end();
 
 options.path = '/gamefield';
 setTimeout(http.request(optionsGET,function(res){
-  
+  res.on('data',function()){
+    console.log(res);
+  }
 }), 10000);
 end();
