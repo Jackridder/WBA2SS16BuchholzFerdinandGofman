@@ -1,3 +1,4 @@
+alert("test"); /*
 var app = require('http');
 var bodyParser = require('body-parser');
 var jsonParser = bodyParser.json();
@@ -24,7 +25,7 @@ var optionsPOST = {
 
 var clientID;
 
-optionsPOST.path = '/Spielfigur';
+optionsPOST.path = '/spielfigur';
 var postSpielfigur = http.request(optionsPOST, function(res){
   console.log("Spieler hat sich verbunden");
   res.on('data',function(){
@@ -40,4 +41,4 @@ setTimeout(http.request(optionsGET,function(res){
     console.log(res);
   }
 }), 10000);
-end();
+end();*/

@@ -19,6 +19,19 @@ app.get('/dice',function (req,res){
     res.end(lastDice.toString());
 });
 
+app.get('/client',function (req,res) {
+  res.sendFile(__dirname+'/client/client.js', function (err){
+     if(err) {
+          console.log(err);
+          res.status(404).end("Datei nich gefunden");
+      }
+      else{
+          console.log("Datei geschickt!");
+      }
+      res.end();
+  });
+});
+
 app.get('/gamefield',function (req,res) {
   res.sendFile(__dirname+'/gamefield/gamefield.jpg', function (err){
      if(err) {
@@ -75,6 +88,23 @@ app.delete('/spielfigur',function (req,res) {
     res.end();
 });
 
+app.get('/spielfigur/:picname',function (req,res) {
+    var filename = req.params.picname;
+    res.sendFile(__dirname+'/spielfigur/'+filename, function (err){
+       if(err) {
+            console.error("SendFile error:", err, " (status: " + err.status + ")");
+            //console.log(err);
+            if (err.status) {
+              res.status(err.status).end();
+            }
+        }
+        else{
+            console.log("Datei geschickt!");
+        }
+        res.end();
+    });
+});
+
 app.get('/spielfigur',function (req,res) {
   console.log("GET Spielfigur: "+playerCount);
   switch (playerCount) {
@@ -105,7 +135,7 @@ app.get('/spielfigur',function (req,res) {
       });
       break;
     case 3:
-      res.sendFile(__dirname+'/spielfigur/3.html', function (err){
+      res.sendFile(__dirname+'/gamefield/3.html', function (err){
          if(err) {
               console.log(err);
           }
@@ -116,7 +146,7 @@ app.get('/spielfigur',function (req,res) {
       });
       break;
     case 4:
-      res.sendFile(__dirname+'/spielfigur/4.html', function (err){
+      res.sendFile(__dirname+'/gamefield/4.html', function (err){
          if(err) {
               console.log(err);
           }
