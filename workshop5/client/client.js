@@ -1,44 +1,53 @@
-alert("test"); /*
-var app = require('http');
+var http = require('http');
 var bodyParser = require('body-parser');
 var jsonParser = bodyParser.json();
 
-var optionsGET = {
-  host: 'localhost',
-  port: 3000,
-  path: 'leer',
-  method: 'GET',
-  headers: {
-    accept: 'application/json'
+var data;
+
+function postFigur(){
+  var optionsPOST = {
+    host: 'localhost',
+    port: 3000,
+    path: 'leer',
+    method: 'POST',
+    headers: {
+      accept: 'application/json'
+    }
   }
-}
 
-var optionsPOST = {
-  host: 'localhost',
-  port: 3000,
-  path: 'leer',
-  method: 'POST',
-  headers: {
-    accept: 'application/json'
-  }
-}
+  optionsPOST.path = '/spielfigur';
 
-var clientID;
-
-optionsPOST.path = '/spielfigur';
-var postSpielfigur = http.request(optionsPOST, function(res){
-  console.log("Spieler hat sich verbunden");
-  res.on('data',function(){
-    ClientID = jsonParser(data);
-    console.log(res);
+  var postSpielfigur = http.request(optionsPOST, function(res){
+    console.log("Spieler hat sich verbunden");
+    res.on('data', function(chunk){
+        data = chunk;
+    });
+    res.on('end',function(){
+      //getField();
+      setInterval(getField, 1000);
+    });
+    console.log("Ende");
   });
-});
-postSpielfigur.end();
+  postSpielfigur.end();
+}
+postFigur();
 
-options.path = '/gamefield';
-setTimeout(http.request(optionsGET,function(res){
-  res.on('data',function()){
-    console.log(res);
+function getField(){
+  console.log("in GetField");
+  var optionsGET = {
+    host: 'localhost',
+    port: 3000,
+    path: 'leer',
+    method: 'GET',
+    headers: {
+      accept: 'application/json'
+    }
   }
-}), 10000);
-end();*/
+  optionsGET.path = '/gamefield';
+  http.request(optionsGET,function(res){
+    console.log("getField");
+    res.on('data',function(){
+      console.log("getfield: "+res);
+    });
+  });
+}

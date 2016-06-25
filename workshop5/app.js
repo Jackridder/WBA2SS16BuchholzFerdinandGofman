@@ -176,6 +176,7 @@ app.get('/spielfigur',function (req,res) {
 });
 
 app.post('/spielfigur',jsonParser,function (req,res) {
+  console.log("Spieler "+playerCount+" verbunden");
   if(playerCount<4){
     playerCount++;
     res.end(playerCount.toString());
