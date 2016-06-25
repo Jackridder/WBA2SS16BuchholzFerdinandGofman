@@ -1,29 +1,36 @@
-var express = require('express');
-var bodyParser = require('body-parser');
-var clients = io.sockets.clients().length;
-var app = express();-
-app.listen(3000,function(){
-    console.log("Server running on 3000");
-});
+var clientID;
+var app = require('http');
+var optionsGET = {
+  host: 'localhost',
+  port: 3000,
+  path: 'leer',
+  method: 'GET',
+  headers: {
+    accept: 'application/json'
+  }
+}
 
-var jsonParser = bodyParser.json();
-app.use(jsonParser);
+var optionsPOST = {
+  host: 'localhost',
+  port: 3000,
+  path: 'leer',
+  method: 'POST',
+  headers: {
+    accept: 'application/json'
+  }
+}
 
-if(clients==4){
-  app.get('/gamefield', function(req,res)){
-    res.sendFile(__dirname+'/gamefield/gamefield.jpg', function(err){
-      if(err){
-        console.log(err);
-        res.status(404).end("Datei nicht gefunden");
-      }
-      else{
-        console.log("Datei geschickt!");
-      }
-      res.end();
-    });
+optionsPOST.path = '/Spielfigur';
+var postSpielfigur = http.request(options, function(res){
+  console.log("Spieler hat sich verbunden");
+  res.on('data',function(){
+    console.log(res);
   });
-}
-else{
-  console.log("Es sind bisher nur " + clients + " verbunden!");
-  console.log("Spiel startet erst bei genau 4 verbundenen Spielern!");
-}
+});
+postSpielfigur.end();
+
+options.path = '/gamefield';
+setTimeout(http.request(options,function(res){
+
+}), 10000);
+end();
