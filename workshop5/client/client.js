@@ -48,6 +48,28 @@ function getField(){
     console.log("getField");
     res.on('data',function(){
       console.log("getfield: "+res);
+      location.reload();
+    });
+  });
+}
+
+function resetGame(){
+  console.log("reset");
+  var optionsGET = {
+    host: 'localhost',
+    port: 3000,
+    path: 'leer',
+    method: 'DELETE',
+    headers: {
+      accept: 'application/json'
+    }
+  }
+  optionsGET.path = '/spielfigur';
+  http.request(optionsGET,function(res){
+    console.log("delete spielfigur");
+    res.on('data',function(){
+      console.log("getfield: "+res);
+      document.getElementById("gamecontainer").innerHTML = "test";
     });
   });
 }

@@ -20,7 +20,7 @@ app.get('/dice',function (req,res){
 });
 
 app.get('/client',function (req,res) {
-  res.sendFile(__dirname+'/client/client.js', function (err){
+  res.sendFile(__dirname+'/client/browser.js', function (err){
      if(err) {
           console.log(err);
           res.status(404).end("Datei nich gefunden");
