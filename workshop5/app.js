@@ -1,5 +1,13 @@
 var express = require('express');
 var bodyParser = require('body-parser');
+var io = require('socket.io').listen(3001);
+
+io.sockets.on('connection',function(socket){
+  socketDienstnutzer.emit('gameStart', {hello : 'test'});
+  socket.on('my other event', function(data){
+    console.log(data);
+  });
+});
 
 var app = express();
 app.listen(3000,function(){

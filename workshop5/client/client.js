@@ -1,7 +1,13 @@
 var http = require('http');
 var bodyParser = require('body-parser');
 var jsonParser = bodyParser.json();
-
+/*
+var express = require('express');
+var app = express();
+app.listen(3001,function(){
+    console.log("Server running on 3001");
+});
+*/
 var data;
 
 function postFigur(){
@@ -13,7 +19,7 @@ function postFigur(){
     headers: {
       accept: 'application/json'
     }
-  }
+}
 
   optionsPOST.path = '/spielfigur';
 
