@@ -199,8 +199,10 @@ app.get('/rules',function (req,res) {
 });
 
 
-
+app.set('view engine', 'ejs');
 app.get('/',function (req,res) {
+    res.render('index',{players:playerCount});
+    /*
     res.sendFile(__dirname+'/index.html', function (err){
        if(err) {
             console.log(err);
@@ -209,5 +211,5 @@ app.get('/',function (req,res) {
             console.log("Datei geschickt!");
         }
         res.end();
-    });
+    });*/
 });
