@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>Mensch ärger dich nicht</title>
+		<script src="https://code.jquery.com/jquery-3.0.0.min.js"></script>
+		<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+		<script>
+			var socket = io.connect('http://localhost:3001');
+			console.log(socket);
+			$( document ).ready(function() {
+				$('#newGame').click(function(){
+					console.log("klick")
+					socket.emit('join',function(data){
+						console.log("EMIT: JOIN");
+					});
+					$(this).attr("disabled", true);
+				})
+				$('#abort').click(function(){
+					socket.emit('abort',function(data){
+						console.log("EMIT: ABORT");
+					});
+				})
+				socket.on('players', function (data) {
+			    console.log("players: "+data.data);
+					$('#playcount').text(data.data);
+					//socket.emit('join');
+			  });
+			});
+		</script>
+	</head>
+	<body>
+		Anzahl der aktuellen Spieler: <span id='playcount'></span>
+		<br>
+		<form method="POST">
+			<input type="button" id="newGame" value="Neues Spiel" />
+			<input type="button" id="abort" value="Spiel abbrechen" />
+		</form>
+	</body>
+</html>

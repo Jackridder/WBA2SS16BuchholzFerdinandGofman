@@ -30,7 +30,8 @@ function postFigur(){
   });
   postSpielfigur.end();
 }
-//postFigur();
+
+postFigur();
 
 function getField(){
   console.log("in GetField");

@@ -85,7 +85,7 @@ app.delete('/spielfigur',function (req,res) {
     playerCount = 0;
     possibleMoves = [];
     lastDice = 0;
-    res.end();
+    res.end("true");
 });
 
 app.get('/spielfigur/:picname',function (req,res) {
@@ -107,7 +107,9 @@ app.get('/spielfigur/:picname',function (req,res) {
 
 app.get('/spielfigur',function (req,res) {
   console.log("GET Spielfigur: "+playerCount);
-  switch (playerCount) {
+  res.write(playerCount.toString());
+  res.end();
+  /*switch (playerCount) {
     case 1:
       res.sendFile(__dirname+'/gamefield/1.html', function (err){
          if(err) {
@@ -172,16 +174,16 @@ app.get('/spielfigur',function (req,res) {
           res.end();
       });
       break;
-    }
+    }*/
 });
 
 app.post('/spielfigur',jsonParser,function (req,res) {
   console.log("Spieler "+playerCount+" verbunden");
   if(playerCount<4){
     playerCount++;
-    res.end(playerCount.toString());
+    res.end("true");
   }else{
-    res.end("Spiel bereits gestartet");
+    res.end("false"); //spiel bereits gestartet
   }
 
 });
@@ -196,20 +198,4 @@ app.get('/rules',function (req,res) {
       }
       res.end();
   });
-});
-
-
-app.set('view engine', 'ejs');
-app.get('/',function (req,res) {
-    res.render('index',{players:playerCount});
-    /*
-    res.sendFile(__dirname+'/index.html', function (err){
-       if(err) {
-            console.log(err);
-        }
-        else{
-            console.log("Datei geschickt!");
-        }
-        res.end();
-    });*/
 });
