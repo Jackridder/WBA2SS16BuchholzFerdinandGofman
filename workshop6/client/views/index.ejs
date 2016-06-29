@@ -10,22 +10,80 @@
 			console.log(socket);
 			$( document ).ready(function() {
 				$('#newGame').click(function(){
-					console.log("klick");
+					console.log("EMIT join");
 					socket.emit('join');
 					$(this).attr("disabled", true);
-				})
+				});
+				$('#btnDice').click(function(){
+					console.log("EMIT dice");
+					socket.emit('dice');
+					//$(this).attr("disabled", true);
+				});
+				socket.on('diced',function (msg){
+					console.log("dice result: "+msg.data);
+					$("#lbDice").text(6);
+				});
+
+				//Update player count
 				socket.on('players', function (msg) {
-			    console.log("players: "+msg.data);
-					$('#playcount').text(msg.data);
+					console.log("players: "+msg.data);
+					var c = msg.data;
+					$('#playcount').text(c);
+					$('#players').empty();
+					for(var j=0;j<c;j++){
+						var startX = 43+(j*450);
+						var startY = 25;
+						if(j==2){
+							var startX = 43;
+							var startY = 25+(j*225);
+						}
+						if(j==3){
+							var startX = 43+(j*150);
+							var startY = 25+(j*150);
+						}
+						for(var i=0;i<4;i++){ //Figurschleife
+
+							if(i==2){
+								startY+=55;
+								startX-=100;
+							}
+							$('#players').append("<img src='spielfigur/"+j+"' class='player' id='player"+i+j+"'/>");
+							$('#player'+i+j).css({"position":"absolute","left":startX+(50*i),"top":startY});
+						}
+					}
+
 			  });
+				socket.on('left',function (msg){
+					console.log("LEFT");
+					for(var i=0;i<4;i++)
+						$('#players').remove();
+				});
+				$("#players").delegate("img","click",function(){
+					console.log(this.id);
+					var dice = $("#lbDice").text();
+					if(dice == 6){
+						movePlayer(this.id,43,230);
+					}
+				});
+				function movePlayer(player,x,y){
+					var player = "#"+player;
+					$(player).css({"left":x,"top":y});
+				}
 			});
 		</script>
+		<style>
+			.player{width:30px;height:auto;}
+		</style>
 	</head>
 	<body>
-		Anzahl der aktuellen Spieler: <span id='playcount'></span>
 		<br>
+		<div id='players'>
+		</div>
+		<img src='gamefield/' />
 		<form method="POST">
-			<input type="button" id="newGame" value="Neues Spiel" />
+			<input type="button" id="newGame" value="Spiel beitren" />
 		</form>
+		<br>
+		<input type="button" id="btnDice" value="Würfeln" /> <label for="btnDice" id="lbDice">0</label>
 	</body>
 </html>
