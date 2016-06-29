@@ -7,7 +7,6 @@ app.listen(3000,function(){
 });
 
 app.use(jsonParser);
-//app.use(bodyParser.urlencoded());
 
 var lastDice = 0;
 var possibleMoves = Array(40); // 40 Mögliche Spielfeldpositionen
@@ -26,18 +25,39 @@ for(var i=0; i<goalArray.length; i++) {
   goalArray[i] = 0;
 }
 
+//Ist das Feld durch einen Gegner besetzt wird die ID zurückgegeben (zum entfernen vom Spielfeld)
 app.get('/spielzug',function(req,res){
   for(var i = 0; i<possibleMoves.length;i++){
     if(req.body.id == possibleMoves[i]){
-      res.end(i);
+      res.end(i.toString());
     }
   }
 });
-//Durch Gegner besetzt, nicht besetzt, selbst besetzt
+// nicht besetzt = 0, durch sich selbst besetzt = 1, durch Gegner besetzt = 2
 app.put('/spielzug',function(req,res){
   var id = req.body.id;
   var playerID = id.charAt(id.length);
   var figureID = id.charAt(id.length-1);
+  var currentPosition = 0;
+  //Finde aktuelle Position von Figur
+  for(var i = 0; i < possibleMoves.length; i++){
+    if(possibleMoves[i] == figureID){
+      currentPosition = i;
+      break;
+    }
+  }
+  //Ist das Feld leer wird eine 0 zurückgegeben
+  if(possibleMoves[currentPosition+lastDice] == 0){
+    res.end("0");
+  }
+  //Ist das Feld durch eine eigene Figur besetzt, wird eine 1 zurückgegeben
+  for(var i=playerID*4; i<playerID*4+4; i++) {
+    if(possibleMoves[currentPosition+lastDice] == i){
+      res.end("1");
+    }
+  }
+  //Ist das Feld durch einen Gegner besetzt, wird eine 2 zurückgegeben
+  res.end("2");
 });
 
 app.get('/dice',function (req,res){
