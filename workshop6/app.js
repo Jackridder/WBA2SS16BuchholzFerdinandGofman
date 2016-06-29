@@ -11,7 +11,9 @@ app.use(jsonParser);
 
 var lastDice = 0;
 var possibleMoves = Array(40); // 40 Mögliche Spielfeldpositionen
-var homeArray = Array(4); // Basis der Spielfiguren
+var homeArray = Array(16); // Basis der Spielfiguren
+var goalArray = Array(4); //Ziel der Spielfiguren
+var homeCount = 0;
 var goal;
 var playerCount = 0;
 var diceCount = 0;
@@ -20,23 +22,39 @@ var diceCount = 0;
 for(var i=0; i<possibleMoves.length; i++) {
   possibleMoves[i] = 0;
 }
+for(var i=0; i<goalArray.length; i++) {
+  goalArray[i] = 0;
+}
 
 app.get('/dice',function (req,res){
     dice();
     res.end(lastDice.toString());
 });
 
-app.get('/client',function (req,res) {
-  res.sendFile(__dirname+'/client/browser.js', function (err){
-     if(err) {
-          console.log(err);
-          res.status(404).end("Datei nich gefunden");
-      }
-      else{
-          console.log("Datei geschickt!");
-      }
-      res.end();
-  });
+app.get('/dice/number',function(req,res){
+  //Wie oft Würfeln
+  homeCount = 0;
+  for(var i=playerID*4; i<playerID*4+4; i++) {
+    if(homeArray[i] == 1) {
+      homeCount++;
+    }
+    if(homeCount == 4) {
+      res.end("3");
+    }
+  }
+  for(var i = playerID*4; i<playerID*4+4; i++){
+    if(goalArray[i] == 0) {
+          res.end("1");
+    }else if(goalArray[i] == 1 && goalArray[i-1] == 0 && goalArray[i-2] == 0 && goalArray[i-3] == 0){
+          res.end("3");
+    }else if(goalArray[i] == 1 && goalArray[i-1] == 1 && goalArray[i-2] == 0 && goalArray[i-3] == 0){
+          res.end("3")
+    }else if(goalArray[i] == 1 && goalArray[i-1] == 1 && goalArray[i-2] == 1 && goalArray[i-3] == 0){
+          res.end("3");
+    }else {
+      red.end("1");
+    }
+  }
 });
 
 app.get('/gamefield',function (req,res) {
@@ -72,71 +90,66 @@ app.get('/gamefield/home',function (req,res) {
 //Würfelfunktion
 function dice() {
   lastDice = Math.round(Math.random() * (6 - 1) + 1);
-//********************* Würfellogik home Anfang *********************
-  //Alle Figuren in home
-  if(homeArray[3] == 1) {
-    //6 Gewürfelt(kein Zug möglich)->letzte Figur aus home auf Startfeld
-    if(lastDice == 6 && possibleMoves[0] == 0) {
-      app.put('/gamefield/home', function(req, res) {
-        //Figur aus home entfernen
-        for(var i = homeArray.length; i>0; i--) {
-            if(homeArray[i] == 1) {
-              homeArray[i] = 0;
-              break;
-            }
-          }
-      });
-      //Spielfigur auf erstes Feld stellen
-      app.put('/gamefield', function(req, res) {
-        possibleMoves[0] = 1;
-      });
-    }
-    //6 Gewürfelt, Startfeld belegt & andere Figur schlagbar
-    else if(lastDice == 6 && possibleMoves[0] == 1 && possibleMoves[5] == 2) {
-      //Figur von Spieler auf neue Pos bewegen
-      app.put('/gamefield', function(req, res) {
-        possibleMoves[5] = 1;
-      });
-      //TO-DO: Gegnerische Spielfigur in Home zurückbewegen
-      dice();
-    }
-    //6 Gewürfelt und Startfeld belegt
-    else if(lastDice == 6 && possibleMoves[0] == 1) {
-      //Figur von Spieler auf neue Pos bewegen
-      app.put('/gamefield', function(req, res) {
-        possibleMoves[5] = 1;
-      });
-      dice();
-    }
-    //Kein Zug möglich: 3 Mal würfel
-    else if(diceCount<2) {
-      diceCount++;
-      dice();
-      }
-      //Drei Mal gewürfelt:
-      else {
-        diceCount = 0;
-      }
-    }
-  }
-//********************* Würfellogik home Ende *********************
-
-//********************* Würfellogik goal Anfang *********************
-
-
-
-
 }
 
-
-
-
-  if(lastDice == 6 && possibleMoves > 0) {
-    app.put('/gamefield/home', function(req, res)) {
-
-    }
-  }
-}
+// app.put('/gamefield/home', function(req, res){
+// //********************* Würfellogik home Anfang *********************
+// //Spieler und Spielfigur ID speichern und trennen
+// var id = req.body.id;
+// var playerID = id.substring(1,2);
+// var figureID = id.substring(0,1);
+//
+//
+//   if(homeArray[] == 1) {
+//     //6 Gewürfelt(kein Zug möglich)->letzte Figur aus home auf Startfeld
+//     if(lastDice == 6 && possibleMoves[0] == 0) {
+//       //Spielfigur auf erstes Feld stellen
+//       app.put('/gamefield', function(req, res) {
+//         possibleMoves[0] = 1;
+//       });
+//     }
+//     //6 Gewürfelt, Startfeld belegt & andere Figur schlagbar
+//     else if(lastDice == 6 && possibleMoves[0] == 1 && possibleMoves[5] == 2) {
+//       //Figur von Spieler auf neue Pos bewegen
+//       possibleMoves[5] == 1;
+//       //TO-DO: Gegner
+//       dice();
+//     }
+//     //6 Gewürfelt und Startfeld belegt
+//     else if(lastDice == 6 && possibleMoves[0] == 1) {
+//       //Figur von Spieler auf neue Pos bewegen
+//       possibleMoves[5] == 1;
+//       dice();
+//     }
+//     //Kein Zug möglich: 3 Mal würfel
+//     else if(diceCount<2) {
+//       diceCount++;
+//       dice();
+//       }
+//       //Drei Mal gewürfelt:
+//       else {
+//         diceCount = 0;
+//       }
+//     }
+//   }
+// //********************* Würfellogik home Ende *********************
+// }
+// //********************* Würfellogik goal Anfang *********************
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//   if(lastDice == 6 && possibleMoves > 0) {
+//     app.put('/gamefield/home', function(req, res)) {
+//
+//     }
+//   }
+// }
 
 
 app.get('/gamefield/goal',function (req,res) {
