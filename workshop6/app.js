@@ -7,7 +7,7 @@ app.listen(3000,function(){
 });
 
 app.use(jsonParser);
-app.use(bodyParser.urlencoded());
+//app.use(bodyParser.urlencoded());
 
 var lastDice = 0;
 var possibleMoves = Array(40); // 40 Mögliche Spielfeldpositionen
@@ -25,6 +25,20 @@ for(var i=0; i<possibleMoves.length; i++) {
 for(var i=0; i<goalArray.length; i++) {
   goalArray[i] = 0;
 }
+
+app.get('/spielzug',function(req,res){
+  for(var i = 0; i<possibleMoves.length;i++){
+    if(req.body.id == possibleMoves[i]){
+      res.end(i);
+    }
+  }
+});
+//Durch Gegner besetzt, nicht besetzt, selbst besetzt
+app.put('/spielzug',function(req,res){
+  var id = req.body.id;
+  var playerID = id.charAt(id.length);
+  var figureID = id.charAt(id.length-1);
+});
 
 app.get('/dice',function (req,res){
     dice();
