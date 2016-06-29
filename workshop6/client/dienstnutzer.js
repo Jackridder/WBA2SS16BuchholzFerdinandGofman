@@ -3,6 +3,7 @@ var server = require('http').Server(app);
 var io = require('socket.io')(server);
 var request = require('request');
 var allClients = [];
+var currentPlayer = 0;
 
 server.listen(3001);
 console.log("Dienstnutzer auf Port 3001");
@@ -28,6 +29,7 @@ var optionsPOST = {
 
 function startGame(){
   console.log("4 Spieler verbunden. Starte spiel");
+  allClients[0].emit('test');
 }
 
 io.on('connection',function(socket){

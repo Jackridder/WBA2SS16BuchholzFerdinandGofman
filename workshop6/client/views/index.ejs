@@ -9,6 +9,7 @@
 			var socket = io.connect('http://localhost:3001');
 			console.log(socket);
 			$( document ).ready(function() {
+
 				$('#newGame').click(function(){
 					console.log("EMIT join");
 					socket.emit('join');
@@ -21,7 +22,7 @@
 				});
 				socket.on('diced',function (msg){
 					console.log("dice result: "+msg.data);
-					$("#lbDice").text(6);
+					$("#lbDice").text(msg.data);
 				});
 
 				//Update player count
@@ -58,17 +59,30 @@
 					for(var i=0;i<4;i++)
 						$('#players').remove();
 				});
+				socket.on('test',function (msg){
+					console.log("TEST");
+				});
 				$("#players").delegate("img","click",function(){
-					console.log(this.id);
+					var startPosX = [43,345,245,545];
+					var startPosY = [230,30,530,330];
+					//console.log(this.id);
+					var playerId = this.id.charAt(this.id.length-1);
+					console.log("playerId: "+playerId+" X "+startPosX[playerId]+" Y "+startPosY[playerId]);
 					var dice = $("#lbDice").text();
 					if(dice == 6){
-						movePlayer(this.id,43,230);
+						movePlayer(this.id,startPosX[playerId],startPosY[playerId]);
 					}
 				});
 				function movePlayer(player,x,y){
+					console.log("Move Player "+player+" to X "+x+" Y "+y);
 					var player = "#"+player;
 					$(player).css({"left":x,"top":y});
 				}
+				document.onmousemove = function(e){
+					var x = e.pageX;
+					var y = e.pageY;
+					$("#mousepos").text("X is "+x+" and Y is "+y);
+				};
 			});
 		</script>
 		<style>
@@ -76,6 +90,7 @@
 		</style>
 	</head>
 	<body>
+		Mauspos:<span id="mousepos"></span>
 		<br>
 		<div id='players'>
 		</div>
@@ -84,6 +99,6 @@
 			<input type="button" id="newGame" value="Spiel beitren" />
 		</form>
 		<br>
-		<input type="button" id="btnDice" value="Würfeln" /> <label for="btnDice" id="lbDice">0</label>
+		<input type="button" id="btnDice" value="Würfeln" /> <label for="btnDice" id="lbDice">6</label>
 	</body>
 </html>

@@ -72,6 +72,8 @@ app.get('/gamefield/home',function (req,res) {
 //Würfelfunktion
 function dice() {
   lastDice = Math.round(Math.random() * (6 - 1) + 1);
+}
+/*
 //********************* Würfellogik home Anfang *********************
   //Alle Figuren in home
   if(homeArray[3] == 1) {
@@ -137,6 +139,7 @@ function dice() {
     }
   }
 }
+*/
 
 
 app.get('/gamefield/goal',function (req,res) {
