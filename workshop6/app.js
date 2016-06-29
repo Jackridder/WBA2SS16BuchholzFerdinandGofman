@@ -16,6 +16,7 @@ var homeCount = 0;
 var goal;
 var playerCount = 0;
 var diceCount = 0;
+var currentPosition = 0;
 
 //Spielfeld Array: 0 = frei; 1 = gelb, 2 = grün, 3 = schwarz, 4 = rot
 for(var i=0; i<possibleMoves.length; i++) {
@@ -27,18 +28,14 @@ for(var i=0; i<goalArray.length; i++) {
 
 //Ist das Feld durch einen Gegner besetzt wird die ID zurückgegeben (zum entfernen vom Spielfeld)
 app.get('/spielzug',function(req,res){
-  for(var i = 0; i<possibleMoves.length;i++){
-    if(req.body.id == possibleMoves[i]){
-      res.end(i.toString());
-    }
-  }
+  res.end(possibleMoves[currentPosition+lastDice].toString());
 });
 // nicht besetzt = 0, durch sich selbst besetzt = 1, durch Gegner besetzt = 2
 app.put('/spielzug',function(req,res){
   var id = req.body.id;
   var playerID = id.charAt(id.length);
   var figureID = id.charAt(id.length-1);
-  var currentPosition = 0;
+  currentPosition = 0;
   //Finde aktuelle Position von Figur
   for(var i = 0; i < possibleMoves.length; i++){
     if(possibleMoves[i] == figureID){
