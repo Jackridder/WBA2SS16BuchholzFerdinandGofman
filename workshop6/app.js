@@ -108,20 +108,6 @@ app.get('/spielfigur/:picname',function (req,res) {
 app.get('/spielfigur',function (req,res) {
   console.log("GET Spielfigur: "+playerCount);
   res.end(playerCount.toString());
-  /*res.sendFile(__dirname+'/gamefield/1.html', function (err){
-         if(err) {
-              console.error("SendFile error:", err, " (status: " + err.status + ")");
-              //console.log(err);
-              if (err.status) {
-                res.status(err.status).end();
-              }
-          }
-          else{
-              console.log("Datei geschickt!");
-          }
-          res.end();
-      });*/
-
 });
 
 app.post('/spielfigur',jsonParser,function (req,res) {
