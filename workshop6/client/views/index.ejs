@@ -9,23 +9,96 @@
 			var socket = io.connect('http://localhost:3001');
 			console.log(socket);
 			$( document ).ready(function() {
+
 				$('#newGame').click(function(){
-					console.log("klick");
+					console.log("EMIT join");
 					socket.emit('join');
 					$(this).attr("disabled", true);
-				})
+				});
+				$('#btnDice').click(function(){
+					console.log("EMIT dice");
+					socket.emit('dice');
+					//$(this).attr("disabled", true);
+				});
+				socket.on('diced',function (msg){
+					console.log("dice result: "+msg.data);
+					$("#lbDice").text(msg.data);
+				});
+
+				//Update player count
 				socket.on('players', function (msg) {
-			    console.log("players: "+msg.data);
-					$('#playcount').text(msg.data);
+					console.log("players: "+msg.data);
+					var c = msg.data;
+					$('#playcount').text(c);
+					$('#players').empty();
+					for(var j=0;j<c;j++){
+						var startX = 43+(j*450);
+						var startY = 25;
+						if(j==2){
+							var startX = 43;
+							var startY = 25+(j*225);
+						}
+						if(j==3){
+							var startX = 43+(j*150);
+							var startY = 25+(j*150);
+						}
+						for(var i=0;i<4;i++){ //Figurschleife
+
+							if(i==2){
+								startY+=55;
+								startX-=100;
+							}
+							$('#players').append("<img src='spielfigur/"+j+"' class='player' id='player"+i+j+"'/>");
+							$('#player'+i+j).css({"position":"absolute","left":startX+(50*i),"top":startY});
+						}
+					}
+
 			  });
+				socket.on('left',function (msg){
+					console.log("LEFT");
+					for(var i=0;i<4;i++)
+						$('#players').remove();
+				});
+				socket.on('test',function (msg){
+					console.log("TEST");
+				});
+				$("#players").delegate("img","click",function(){
+					var startPosX = [43,345,245,545];
+					var startPosY = [230,30,530,330];
+					//console.log(this.id);
+					var playerId = this.id.charAt(this.id.length-1);
+					console.log("playerId: "+playerId+" X "+startPosX[playerId]+" Y "+startPosY[playerId]);
+					var dice = $("#lbDice").text();
+					if(dice == 6){
+						movePlayer(this.id,startPosX[playerId],startPosY[playerId]);
+					}
+				});
+				function movePlayer(player,x,y){
+					console.log("Move Player "+player+" to X "+x+" Y "+y);
+					var player = "#"+player;
+					$(player).css({"left":x,"top":y});
+				}
+				document.onmousemove = function(e){
+					var x = e.pageX;
+					var y = e.pageY;
+					$("#mousepos").text("X is "+x+" and Y is "+y);
+				};
 			});
 		</script>
+		<style>
+			.player{width:30px;height:auto;}
+		</style>
 	</head>
 	<body>
-		Anzahl der aktuellen Spieler: <span id='playcount'></span>
+		Mauspos:<span id="mousepos"></span>
 		<br>
+		<div id='players'>
+		</div>
+		<img src='gamefield/' />
 		<form method="POST">
-			<input type="button" id="newGame" value="Neues Spiel" />
+			<input type="button" id="newGame" value="Spiel beitren" />
 		</form>
+		<br>
+		<input type="button" id="btnDice" value="Würfeln" /> <label for="btnDice" id="lbDice">6</label>
 	</body>
 </html>

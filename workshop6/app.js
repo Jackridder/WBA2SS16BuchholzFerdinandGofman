@@ -1,13 +1,13 @@
 var express = require('express');
 var bodyParser = require('body-parser');
-
+var jsonParser = bodyParser.json();
 var app = express();
 app.listen(3000,function(){
     console.log("Server running on 3000");
 });
 
-var jsonParser = bodyParser.json();
 app.use(jsonParser);
+app.use(bodyParser.urlencoded());
 
 var lastDice = 0;
 var possibleMoves = Array(40); // 40 Mögliche Spielfeldpositionen
@@ -31,8 +31,13 @@ app.get('/dice',function (req,res){
     res.end(lastDice.toString());
 });
 
-app.get('/dice/number',function(req,res){
+app.put('/dice/number',bodyParser.urlencoded({extended:true}),function(req,res){
   //Wie oft Würfeln
+  var id = req.body.id;
+  console.log(req.body.id);
+
+  var playerID = id.charAt(id.length);
+  var figureID = id.substring(0,1);
   homeCount = 0;
   for(var i=playerID*4; i<playerID*4+4; i++) {
     if(homeArray[i] == 1) {
