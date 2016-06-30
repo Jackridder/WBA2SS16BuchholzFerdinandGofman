@@ -28,9 +28,14 @@
 					var startX = 43;
 					var startY = 230;
 					posMap[i] = {x:startX+(50*i),y:startY};
-					console.log("POSMAP: "+posMap[i].x+":"+posMap[i].y);
+					//console.log("POSMAP: "+posMap[i].x+":"+posMap[i].y);
 				}
+				function addFigure(pId,fId,x,y){
+					//console.log("FIGADD "+pId+" "+fId+" "+x+" "+y);
+					$('#player'+pId).append("<img src='spielfigur/"+pId+"' class='player' id='player"+fId+pId+"'/>");
+					$('#player'+fId+pId).css({"position":"absolute","left":x,"top":y});
 
+				}
 				//Update player count
 				socket.on('players', function (msg) {
 					console.log("players: "+msg.data);
@@ -53,71 +58,75 @@
 							var startY = 25+(j*150);
 						}
 						$('#players').append("<div id='player"+j+"'/>");
+						//test();
+
 						for(var i=0;i<4;i++){ //Figurschleife
 
 							if(i==2){
 								startY+=55;
 								startX-=100;
 							}
-							$('#player'+j).append("<img src='spielfigur/"+j+"' class='player' id='player"+i+j+"'/>");
-							$('#player'+i+j).css({"position":"absolute","left":startX+(50*i),"top":startY});
+							addFigure(j,i,startX+(50*i),startY);
 							homeMap[count]= {'x':startX+(50*i),'y':startY};
 							count++;
 						}
-						for(var i=0;i<=40;i++){ //Figurschleife
-							startX = 43;
-							startY = 233;
-							if(i>=5&&i<9){
-								startY-=(i*50)-200;
-								startX-=(i*50)-200;
-							}else if(i==9){
-								startY-=(i*50)-250;
-								startX-=(i*50)-250;
-							}else if(i>=10 && i<14){
-								startY+=(i*50)-700;
-								startX-=(i*50)-300;
-							}else if(i==14){
-								startX-=(i*50)-300;
-							}else if(i>=15 && i<19){
-								startX+=(i)-417;
-							}else if(i>=15 && i<19){
-								startX+=(i)-417;
-							}else if(i==19){
-								startX+=(i)-467;
-								startY+=(i*50)-900;
-							}else if(i>=20 && i<25){
-								startX+=1500;
-								startY=330;
-							}else if(i>=25 && i<29){
-								startX+=i*50+300;
-								startY+=50*i-1100;
-							}else if(i>=30 && i<32){
-								startX+=1750;
-								startY=530;
-							}else if(i>=32 && i<36){
-								startX+=i*50+200;
-								startY-=-1850+i*50;
-							}else if(i>=36&& i<40){
-								startX+=1950;
-								startY=330;
-							}else if(i==40){
-								startX=2043;
-								startY-=-2050+i*50;
-							}
-							posMap[i] = {x:startX+(50*i),y:startY};
-							/*
-							$('#player'+j).append("<img src='spielfigur/"+j+"' class='player' id='player"+i+j+10+"'/>");
-							if(i<20){
-								$('#player'+i+j+10).css({"position":"absolute","left":startX+(50*i),"top":startY});
-							}else{
-								$('#player'+i+j+10).css({"position":"absolute","left":startX-(50*i),"top":startY});
-							}*/
 
-						}
 					}
 					if(msg.data==4)
 						socket.emit('initHome',{data:homeMap});
 			  });
+
+				for(var i=0;i<=40;i++){ //Figurschleife
+					startX = 43;
+					startY = 233;
+					if(i>=5&&i<9){
+						startY-=(i*50)-200;
+						startX-=(i*50)-200;
+					}else if(i==9){
+						startY-=(i*50)-250;
+						startX-=(i*50)-250;
+					}else if(i>=10 && i<14){
+						startY+=(i*50)-700;
+						startX-=(i*50)-300;
+					}else if(i==14){
+						startX-=(i*50)-300;
+					}else if(i>=15 && i<19){
+						startX+=(i)-417;
+					}else if(i>=15 && i<19){
+						startX+=(i)-417;
+					}else if(i==19){
+						startX+=(i)-467;
+						startY+=(i*50)-900;
+					}else if(i>=20 && i<25){
+						startX+=1500;
+						startY=330;
+					}else if(i>=25 && i<29){
+						startX+=i*50+300;
+						startY+=50*i-1100;
+					}else if(i>=30 && i<32){
+						startX+=1750;
+						startY=530;
+					}else if(i>=32 && i<36){
+						startX+=i*50+200;
+						startY-=-1850+i*50;
+					}else if(i>=36&& i<40){
+						startX+=1950;
+						startY=330;
+					}else if(i==40){
+						startX=2043;
+						startY-=-2050+i*50;
+					}
+
+					//$('#player'+j).append("<img src='spielfigur/"+j+"' class='player' id='player"+i+j+10+"'/>");
+					if(i<20){
+						posMap[i] = {x:startX+(50*i),y:startY};
+						//$('#player'+i+j+10).css({"position":"absolute","left":startX+(50*i),"top":startY});
+					}else{
+						posMap[i] = {x:startX-(50*i),y:startY};
+						//$('#player'+i+j+10).css({"position":"absolute","left":startX-(50*i),"top":startY});
+					}
+				}
+
 				socket.on('left',function (msg){
 					console.log("LEFT");
 					for(var i=0;i<4;i++)
@@ -147,7 +156,7 @@
 					var startPosY = [230,30,530,330];
 					var playerId = player.charAt(player.length-1);
 					console.log("playerId: "+playerId+" X "+startPosX[playerId]+" Y "+startPosY[playerId]);
-					//socket.emit('moved',{data:player,x:startPosX[playerId],y:startPosY[playerId]});
+					socket.emit('moved',{data:player,x:startPosX[playerId],y:startPosY[playerId]});
 					var player = "#"+player;
 					$(player).css({"left":startPosX[playerId],"top":startPosY[playerId]});
 					console.log($(player).position());
@@ -158,11 +167,14 @@
 					console.log("UNLOCKING UI "+id);
 					$("#btnDice").attr("disabled", false);
 					$('#players').on("click","#player"+id+" img",function(){
-					var dice = $("#lbDice").text();
+						var dice = $("#lbDice").text();
+						id = ($(this).find("#player"+id+" img").prevObject[0].id.charAt($(this).find("#player"+id+" img").prevObject[0].id.length-2));
+						socket.emit('movewish',{figure:id,x:posMap[0].x,y:posMap[0].y});
+
 						if(dice == 6){
 							//movePlayer(this.id,startPosX[playerId],startPosY[playerId]);
-							getOutPlayer(this.id);
-							//movePlayer(this.id,posMap[2].x,posMap[2].y);
+							//getOutPlayer(this.id);
+							//movePlayer(this.id,posMap[20].x,posMap[20].y);
 
 							lockUI(id);
 						}
@@ -185,6 +197,13 @@
 				unlockUI(0);
 				//lockUI(0);
 
+				function test(){
+					for(var i=0;i<=40;i++){
+						addFigure(0,i+10,posMap[i].x,posMap[i].y);
+					}
+				}
+
+				console.log("test");
 			});
 		</script>
 		<style>
@@ -197,7 +216,7 @@
 		</div>
 		<img src='gamefield/' />
 		<form method="POST">
-			<input type="button" id="newGame" value="Spiel beitren" />
+			<input type="button" id="newGame" value="Spiel beitreten" />
 		</form>
 		<br>
 		<input type="button" id="btnDice" value="Würfeln" /> <label for="btnDice" id="lbDice">6</label>

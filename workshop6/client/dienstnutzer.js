@@ -29,7 +29,7 @@ var optionsPOST = {
 
 function startGame(){
   console.log("4 Spieler verbunden. Starte spiel");
-  allClients[currentPlayer].emit('tokenadd',{data:currentPlayer});
+  allClients[0].emit('tokenadd',{data:currentPlayer});
 
 }
 
@@ -68,12 +68,36 @@ io.sockets.on('connection', function(socket) {
        }
      });
    });
+   socket.on('movewish',function(msg){
+     console.log("MOVEWISH: "+msg.figure);
+     request.put('http://localhost:3000/spielzug',{form:{id:msg.figure}}, function (error, response, body) {
+       if (!error && response.statusCode == 200) {
+         console.log("MOVEWISH ANSWER:"+body);
+         var canMove;
+         if(body==2){
+           canMove = false;
+         }else{
+           canMove = true;
+         }
+         canMove = true; //debug
+         allClients[currentPlayer].emit('move',{data:canMove,x:msg.x,y:msg.y});
+
+       }
+     });
+   })
    socket.on('moved',function(msg){
      console.log("Player "+msg.data+" moved to X"+msg.x+" Y"+msg.y);
      io.emit('move',{data:true,player:msg.data,x:msg.x,y:msg.y})
      allClients[currentPlayer].emit('tokenremove',{data:currentPlayer});
-     currentPlayer = (currentPlayer+1)%4
-     allClients[currentPlayer].emit('tokenadd',{data:currentPlayer});
+     //Wie oft darf gewürfelt werden
+     request.put('http://localhost:3000/dice/number',{form:{id:msg.data.charAt(msg.data.length)}}, function (error, response, body) {
+       if (!error && response.statusCode == 200) {
+         console.log("PUT:"+body);
+         currentPlayer = (currentPlayer+1)%4;
+         allClients[currentPlayer].emit('tokenadd',{data:currentPlayer});
+       }
+     });
+
    })
    socket.on('disconnect', function() {
       console.log('Player left');

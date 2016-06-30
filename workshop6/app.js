@@ -4,12 +4,9 @@ var jsonParser = bodyParser.json();
 var app = express();
 app.listen(3000,function(){
     console.log("Server running on 3000");
-    app.use(bodyParser.urlencoded({extended:true}));
-    app.use(jsonParser);
 });
 
-
-
+app.use(jsonParser);
 
 var lastDice = 0;
 var possibleMoves = Array(40); // 40 Mögliche Spielfeldpositionen (ohne goal und home)
@@ -28,20 +25,28 @@ for(var i=0; i<possibleMoves.length; i++) {
 for(var i=0; i<goalArray.length; i++) {
   goalArray[i] = 0;
 }
+for(var i=0; i<homeArray.length; i++) {
+  homeArray[i] = 1;
+}
 
 //Spielfigurposition ermitteln
-app.get('/spielfigur/position',function(req, res){
+app.put('/spielfigur/position',bodyParser.urlencoded({extended:true}) ,function(req, res){
   var id = req.body.id;
   //Figuren ID ermitteln
   var figureID = String(id).charAt(0);
+  console.log("POSITION:"+figureID);
+  //var figureID = id.charAt(id.length-1);
   //Alle Spielfelder durchlaufen
   for(var i = 0; i < possibleMoves.length; i++){
     //ID des Felds = Figuren ID -> Rückgabe
     if(possibleMoves[i] == figureID){
+      console.log("Spieler "+figureID+" befindet sich auf "+i);
       res.end(i.toString());
     }
   }
   //Figur nicht auf Spielfeld: Verweis auf Goal-Array
+  console.log("ziel:"+possibleMoves[0]);
+
   res.end("40");
   //Überprüfung ob in Goal im Dienstnutzer
 });
@@ -50,7 +55,7 @@ app.get('/spielfigur/position',function(req, res){
 app.get('gamefield/goal/position', function(req,res) {
   var id = req.body.id;
   //Figuren ID ermitteln
-  var figureID = id.charAt(id.length-1);
+  var figureID = id.substring(id.length-1);
   //Alle Goalfelder durchlaufen
   for(var i = 0; i < goalArray.length; i++){
     //ID des Felds = Figuren ID -> Rückgabe
@@ -70,7 +75,7 @@ app.get('/spielzug',function(req,res){
 app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
   var id = req.body.id;
   var playerID = id.charAt(id.length);
-  var figureID = id.charAt(id.length-1);
+  var figureID = id.substring(id.length-1);
   currentPosition = 0;
   //Finde aktuelle Position von Figur
   for(var i = 0; i < possibleMoves.length; i++){
@@ -95,6 +100,7 @@ app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
 
 app.get('/dice',function (req,res){
     dice();
+    console.log("Es wurde eine "+lastDice+" gewürfelt");
     res.end(lastDice.toString());
 });
 
@@ -104,8 +110,8 @@ app.put('/dice/number',bodyParser.urlencoded({extended:true}),function(req,res){
   console.log(req.body.id);
 
   //Spieler und Figuren ID ermitteln
-  var playerID = id.charAt(id.length);
-  var figureID = id.charAt(id.length-1);
+  var playerID = id;
+  //var figureID = id.substring(0,1);
   homeCount = 0;
   //Sind alle 4 Figuren in der Basis des gewählten Spielers, darf er 3 Mal würfeln
   for(var i=playerID*4; i<playerID*4+4; i++) {
@@ -148,29 +154,35 @@ app.get('/gamefield',function (req,res) {
   });
 });
 
-app.get('/gamefield/neutral',function (req,res) {
+app.put('/gamefield/neutral',bodyParser.urlencoded({extended:true}),function (req,res) {
   // else if(possibleMoves[lastDice+playerID*10] <= playerID*4 && possibleMoves[lastDice+playerID*10] >= playerID*4+3) {
   //   //Figur von Spieler auf neue Pos bewegen
   //   possibleMoves[lastDice+playerID*10] == figureID;
   //   res.end((lastDice+playerID*10).toString());
   // }
   var id = req.body.id;
-  var playerID = id.charAt(id.length);
-  var figureID = id.charAt(id.length-1);
+  var playerID = String(id).charAt(1);
+  var figureID = String(id).charAt(0);
+  console.log(req.body);
+  console.log("neutral: "+id);
 
-  if (possibleMoves[lastDice+playerID*10] <= playerID*4 && possibleMoves[lastDice+playerID*10] >= playerID*4+3){
+/*
+  if (possibleMoves[lastDice+playerID*10] < playerID*4 && possibleMoves[lastDice+playerID*10] > playerID*4+3){
      //Figur von Spieler auf neue Pos bewegen
-     possibleMoves[lastDice+playerID*10] == figureID;
+     possibleMoves[lastDice+playerID*10] = figureID;
      res.end("true");
    }
    else if(possibleMoves[lastDice+playerID*10] >= playerID*4 && possibleMoves[lastDice+playerID*10] <= playerID*4+3){
-     possibleMoves[lastDice+playerID*10] == figureID;
+     possibleMoves[lastDice+playerID*10] = figureID;
      res.end("true");
    }
    else{
      res.end("false");
    }
-
+*/
+console.log("ziel:"+possibleMoves[lastDice+playerID*10]);
+possibleMoves[lastDice+playerID*10] = figureID;
+res.end("true");
 });
 
 app.get('/gamefield/home',function (req,res) {
@@ -182,9 +194,10 @@ app.get('/gamefield/home',function (req,res) {
 
 app.put('/gamefield/home',bodyParser.urlencoded({extended:true}) ,function(req,res){
   var id = req.body.id;
-  var playerID = id.charAt(id.length);
-  var figureID = id.charAt(id.length-1);
-
+  var playerID = id.charAt(1);
+  var figureID = id.charAt(0);
+  console.log(req.body);
+  console.log("Spieler "+playerID+ " versucht Figur "+figureID+" aus home zu bewegen");
   //CurrentPosition an Dienstnutzer übergeben von der Figur,
   //um die Figur zu bewegen
   //Server muss bei jedem Klick abfragen ob Zug möglich Ist
@@ -194,6 +207,7 @@ app.put('/gamefield/home',bodyParser.urlencoded({extended:true}) ,function(req,r
       if(lastDice == 6 && possibleMoves[playerID*10] == 0) {
         //Spielfigur auf erstes Feld stellen
         possibleMoves[playerID*10] = figureID;
+        console.log("Home erfolgreich verlassen: "+possibleMoves[playerID*10]);
         res.end("true");
       }
       //6 Gewürfelt und Startfeld belegt
@@ -206,67 +220,8 @@ app.put('/gamefield/home',bodyParser.urlencoded({extended:true}) ,function(req,r
 //Würfelfunktion
 function dice() {
   lastDice = Math.round(Math.random() * (6 - 1) + 1);
+  lastDice = 6;
 }
-
-// app.put('/gamefield/home', function(req, res){
-// //********************* Würfellogik home Anfang *********************
-// //Spieler und Spielfigur ID speichern und trennen
-// var id = req.body.id;
-// var playerID = id.substring(1,2);
-// var figureID = id.substring(0,1);
-//
-//
-//   if(homeArray[] == 1) {
-//     //6 Gewürfelt(kein Zug möglich)->letzte Figur aus home auf Startfeld
-//     if(lastDice == 6 && possibleMoves[0] == 0) {
-//       //Spielfigur auf erstes Feld stellen
-//       app.put('/gamefield', function(req, res) {
-//         possibleMoves[0] = 1;
-//       });
-//     }
-//     //6 Gewürfelt, Startfeld belegt & andere Figur schlagbar
-//     else if(lastDice == 6 && possibleMoves[0] == 1 && possibleMoves[5] == 2) {
-//       //Figur von Spieler auf neue Pos bewegen
-//       possibleMoves[5] == 1;
-//       //TO-DO: Gegner
-//       dice();
-//     }
-//     //6 Gewürfelt und Startfeld belegt
-//     else if(lastDice == 6 && possibleMoves[0] == 1) {
-//       //Figur von Spieler auf neue Pos bewegen
-//       possibleMoves[5] == 1;
-//       dice();
-//     }
-//     //Kein Zug möglich: 3 Mal würfel
-//     else if(diceCount<2) {
-//       diceCount++;
-//       dice();
-//       }
-//       //Drei Mal gewürfelt:
-//       else {
-//         diceCount = 0;
-//       }
-//     }
-//   }
-// //********************* Würfellogik home Ende *********************
-// }
-// //********************* Würfellogik goal Anfang *********************
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//   if(lastDice == 6 && possibleMoves > 0) {
-//     app.put('/gamefield/home', function(req, res)) {
-//
-//     }
-//   }
-// }
-
 
 app.get('/gamefield/goal',function (req,res) {
     for(i=0;i<4;i++){
