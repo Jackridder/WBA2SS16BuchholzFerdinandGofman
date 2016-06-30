@@ -151,6 +151,23 @@ app.get('/gamefield/neutral',function (req,res) {
   //   possibleMoves[lastDice+playerID*10] == figureID;
   //   res.end((lastDice+playerID*10).toString());
   // }
+  var id = req.body.id;
+  var playerID = id.charAt(id.length);
+  var figureID = id.charAt(id.length-1);
+
+  if (possibleMoves[lastDice+playerID*10] <= playerID*4 && possibleMoves[lastDice+playerID*10] >= playerID*4+3){
+     //Figur von Spieler auf neue Pos bewegen
+     possibleMoves[lastDice+playerID*10] == figureID;
+     res.end("true");
+   }
+   else if(possibleMoves[lastDice+playerID*10] >= playerID*4 && possibleMoves[lastDice+playerID*10] <= playerID*4+3){
+     possibleMoves[lastDice+playerID*10] == figureID;
+     res.end("true");
+   }
+   else{
+     res.end("false");
+   }
+
 });
 
 app.get('/gamefield/home',function (req,res) {
@@ -161,6 +178,7 @@ app.get('/gamefield/home',function (req,res) {
 });
 
 app.put('/gamefield/home',bodyParser.urlencoded({extended:true}) ,function(req,res){
+  var id = req.body.id;
   var playerID = id.charAt(id.length);
   var figureID = id.charAt(id.length-1);
 
@@ -169,15 +187,15 @@ app.put('/gamefield/home',bodyParser.urlencoded({extended:true}) ,function(req,r
   //Server muss bei jedem Klick abfragen ob Zug möglich Ist
   //
     if(homeArray[figureID] == 1){
-      //6 Gewürfelt(kein Zug möglich)->letzte Figur aus home auf Startfeld
+      //6 Gewürfelt(kein Zug möglich)->ausgewählte FigurID aus home auf Startfeld
       if(lastDice == 6 && possibleMoves[playerID*10] == 0) {
         //Spielfigur auf erstes Feld stellen
-        res.end((playerID*10).toString());
+        possibleMoves[playerID*10] = figureID;
+        res.end("true");
       }
       //6 Gewürfelt und Startfeld belegt
-      else if(lastDice == 6 && possibleMoves[playerID*10] >= playerID*4 && possibleMoves[playerID*10] <= playerID*4+3) {
-        //Figur nicht bewegbar
-        res.end("FALSE");
+      else{
+        res.end("false");
       }
     }
 });
