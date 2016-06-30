@@ -26,6 +26,23 @@ for(var i=0; i<goalArray.length; i++) {
   goalArray[i] = 0;
 }
 
+//Spielfigurposition ermitteln
+app.get('/spielfigur/position',bodyParser.urlencoded({extended:true}) ,function(req, res){
+  var id = req.body.id;
+  //Figuren ID ermitteln
+  var figureID = id.substring(id.length-1);
+  //Alle Spielfelder durchlaufen
+  for(var i = 0; i < possibleMoves.length; i++){
+    //Findet man die Figur auf dem Spielfeld wird die aktuelle Position dieser zurückgegeben
+    if(possibleMoves[i] == figureID){
+      res.end(i.toString());
+    }
+  }
+  //Befindet sich die Spielfigur nicht auf dem Spielfeld, dann wird ein wert zurückgegeben der "unmöglich" ist
+  res.end("40");
+  //Danach soll überprüft werden, ob sich die Person in dem Feld Goal befindet.
+});
+
 //Ist das Feld durch einen Gegner besetzt wird die ID zurückgegeben (zum entfernen vom Spielfeld)
 app.get('/spielzug',function(req,res){
   res.end(possibleMoves[currentPosition+lastDice].toString());
@@ -67,9 +84,11 @@ app.put('/dice/number',bodyParser.urlencoded({extended:true}),function(req,res){
   var id = req.body.id;
   console.log(req.body.id);
 
+  //Spieler und Figuren ID ermitteln
   var playerID = id.charAt(id.length);
   var figureID = id.substring(0,1);
   homeCount = 0;
+  //Sind alle 4 Figuren in der Basis des gewählten Spielers, darf er 3 Mal würfeln
   for(var i=playerID*4; i<playerID*4+4; i++) {
     if(homeArray[i] == 1) {
       homeCount++;
@@ -78,15 +97,19 @@ app.put('/dice/number',bodyParser.urlencoded({extended:true}),function(req,res){
       res.end("3");
     }
   }
+  //Wo befinden sich die Figuren, wenn nicht in Home?
   for(var i = playerID*4; i<playerID*4+4; i++){
+    //Ist eine Figur draußen und das letzte Feld ist nicht besetzt, darf er nur 1 Mal würfeln
     if(goalArray[i] == 0) {
           res.end("1");
-    }else if(goalArray[i] == 1 && goalArray[i-1] == 0 && goalArray[i-2] == 0 && goalArray[i-3] == 0){
+          //Ist eine Figur aus Home und diese befindet sich im letzten Feld von Goal darf er 3 Mal würfeln und das gleiche bei 2 und 3 Figuren
+    }else if(goalArray[i] == 1 && goalArray[i-1] == 0 && goalArray[i-2] == 0 && goalArray[i-3] == 0 && homeCount == 3){
           res.end("3");
-    }else if(goalArray[i] == 1 && goalArray[i-1] == 1 && goalArray[i-2] == 0 && goalArray[i-3] == 0){
+    }else if(goalArray[i] == 1 && goalArray[i-1] == 1 && goalArray[i-2] == 0 && goalArray[i-3] == 0 && homeCount == 2){
           res.end("3")
-    }else if(goalArray[i] == 1 && goalArray[i-1] == 1 && goalArray[i-2] == 1 && goalArray[i-3] == 0){
+    }else if(goalArray[i] == 1 && goalArray[i-1] == 1 && goalArray[i-2] == 1 && goalArray[i-3] == 0 && homeCount == 1){
           res.end("3");
+          //Ansonsten darf er nur 1 Mal würfeln
     }else {
       red.end("1");
     }
