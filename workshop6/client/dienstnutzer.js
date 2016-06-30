@@ -29,18 +29,27 @@ var optionsPOST = {
 
 function startGame(){
   console.log("4 Spieler verbunden. Starte spiel");
-  allClients[0].emit('test');
+  allClients[currentPlayer].emit('tokenadd',{data:currentPlayer});
+
 }
 
 io.on('connection',function(socket){
   console.log("IO: Socket verbunden");
-  socket.on('join',function(socket){
+
+  socket.on('initHome',function(msg){
+    console.log("INITHOME");
+
+    //console.log("POSMAP: "+msg.data);
+  })
+
+  socket.on('join',function(){
     console.log("Player joined");
     newPlayer();
     if(allClients.length==4)
       startGame();
   });
-  socket.on('abort',function(socket){
+
+  socket.on('abort',function(){
     console.log("Player aborted");
     newPlayer();
   });
@@ -59,11 +68,16 @@ io.sockets.on('connection', function(socket) {
        }
      });
    });
+   socket.on('moved',function(msg){
+     console.log("Player "+msg.data+" moved to X"+msg.x+" Y"+msg.y);
+     io.emit('move',{data:true,player:msg.data,x:msg.x,y:msg.y})
+     allClients[currentPlayer].emit('tokenremove',{data:currentPlayer});
+     currentPlayer = (currentPlayer+1)%4
+     allClients[currentPlayer].emit('tokenadd',{data:currentPlayer});
+   })
    socket.on('disconnect', function() {
       console.log('Player left');
-
       socket.emit('left',{data:allClients.length});
-
       var i = allClients.indexOf(socket);
       allClients.splice(i, 1);
 
@@ -85,7 +99,7 @@ app.get('/gamefield',function (req,res) {
           res.status(404).end("Datei nich gefunden");
       }
       else{
-          console.log("Datei geschickt!");
+          //console.log("Datei geschickt!");
       }
       res.end();
   });
@@ -102,7 +116,7 @@ app.get('/spielfigur/:picid',function (req,res) {
             }
         }
         else{
-            console.log("Datei geschickt!");
+            //console.log("Datei geschickt!");
         }
         res.end();
     });
@@ -135,3 +149,15 @@ function abortGame(){
     }
   });
 }
+
+app.get('/rules',function (req,res) {
+  res.sendFile(__dirname+'/rules/rules.html', function (err){
+     if(err) {
+          console.log(err);
+      }
+      else{
+          console.log("Datei geschickt!");
+      }
+      res.end();
+  });
+});

@@ -18,17 +18,27 @@
 				$('#btnDice').click(function(){
 					console.log("EMIT dice");
 					socket.emit('dice');
-					//$(this).attr("disabled", true);
 				});
 				socket.on('diced',function (msg){
 					console.log("dice result: "+msg.data);
 					$("#lbDice").text(msg.data);
 				});
+				var posMap = {};
+				for(var i=0;i<40;i++){
+					var startX = 43;
+					var startY = 230;
+					posMap[i] = {x:startX+(50*i),y:startY};
+					console.log("POSMAP: "+posMap[i].x+":"+posMap[i].y);
+				}
 
 				//Update player count
 				socket.on('players', function (msg) {
 					console.log("players: "+msg.data);
 					var c = msg.data;
+					var count = 0;
+
+					var homeMap = {};
+
 					$('#playcount').text(c);
 					$('#players').empty();
 					for(var j=0;j<c;j++){
@@ -42,35 +52,89 @@
 							var startX = 43+(j*150);
 							var startY = 25+(j*150);
 						}
+						$('#players').append("<div id='player"+j+"'/>");
 						for(var i=0;i<4;i++){ //Figurschleife
 
 							if(i==2){
 								startY+=55;
 								startX-=100;
 							}
-							$('#players').append("<img src='spielfigur/"+j+"' class='player' id='player"+i+j+"'/>");
+							$('#player'+j).append("<img src='spielfigur/"+j+"' class='player' id='player"+i+j+"'/>");
 							$('#player'+i+j).css({"position":"absolute","left":startX+(50*i),"top":startY});
+							homeMap[count]= {'x':startX+(50*i),'y':startY};
+							count++;
+						}
+						for(var i=0;i<=40;i++){ //Figurschleife
+							startX = 43;
+							startY = 233;
+							if(i>=5&&i<9){
+								startY-=(i*50)-200;
+								startX-=(i*50)-200;
+							}else if(i==9){
+								startY-=(i*50)-250;
+								startX-=(i*50)-250;
+							}else if(i>=10 && i<14){
+								startY+=(i*50)-700;
+								startX-=(i*50)-300;
+							}else if(i==14){
+								startX-=(i*50)-300;
+							}else if(i>=15 && i<19){
+								startX+=(i)-417;
+							}else if(i>=15 && i<19){
+								startX+=(i)-417;
+							}else if(i==19){
+								startX+=(i)-467;
+								startY+=(i*50)-900;
+							}else if(i>=20 && i<25){
+								startX+=1500;
+								startY=330;
+							}else if(i>=25 && i<29){
+								startX+=i*50+300;
+								startY+=50*i-1100;
+							}else if(i>=30 && i<32){
+								startX+=1750;
+								startY=530;
+							}else if(i>=32 && i<36){
+								startX+=i*50+200;
+								startY-=-1850+i*50;
+							}else if(i>=36&& i<40){
+								startX+=1950;
+								startY=330;
+							}else if(i==40){
+								startX=2043;
+								startY-=-2050+i*50;
+							}
+							posMap[i] = {x:startX+(50*i),y:startY};
+							/*
+							$('#player'+j).append("<img src='spielfigur/"+j+"' class='player' id='player"+i+j+10+"'/>");
+							if(i<20){
+								$('#player'+i+j+10).css({"position":"absolute","left":startX+(50*i),"top":startY});
+							}else{
+								$('#player'+i+j+10).css({"position":"absolute","left":startX-(50*i),"top":startY});
+							}*/
+
 						}
 					}
-
+					if(msg.data==4)
+						socket.emit('initHome',{data:homeMap});
 			  });
 				socket.on('left',function (msg){
 					console.log("LEFT");
 					for(var i=0;i<4;i++)
 						$('#players').remove();
 				});
-				socket.on('test',function (msg){
-					console.log("TEST");
+				socket.on('tokenadd',function (msg){
+					console.log("TOKEN: Meine Runde! Ich bin Spieler "+msg.data);
+					unlockUI(msg.data);
 				});
-				$("#players").delegate("img","click",function(){
-					var startPosX = [43,345,245,545];
-					var startPosY = [230,30,530,330];
-					//console.log(this.id);
-					var playerId = this.id.charAt(this.id.length-1);
-					console.log("playerId: "+playerId+" X "+startPosX[playerId]+" Y "+startPosY[playerId]);
-					var dice = $("#lbDice").text();
-					if(dice == 6){
-						movePlayer(this.id,startPosX[playerId],startPosY[playerId]);
+				socket.on('tokenremove',function (msg){
+					console.log("TOKEN: Runde vorbei! Ich bin Spieler "+msg.data);
+					lockUI();
+				});
+				socket.on('move',function (msg){
+					console.log("MOVE: Server: "+msg.data);
+					if(msg.data==true){
+						movePlayer(msg.player,msg.x,msg.y);
 					}
 				});
 				function movePlayer(player,x,y){
@@ -78,11 +142,49 @@
 					var player = "#"+player;
 					$(player).css({"left":x,"top":y});
 				}
+				function getOutPlayer(player){
+					var startPosX = [43,345,245,545];
+					var startPosY = [230,30,530,330];
+					var playerId = player.charAt(player.length-1);
+					console.log("playerId: "+playerId+" X "+startPosX[playerId]+" Y "+startPosY[playerId]);
+					//socket.emit('moved',{data:player,x:startPosX[playerId],y:startPosY[playerId]});
+					var player = "#"+player;
+					$(player).css({"left":startPosX[playerId],"top":startPosY[playerId]});
+					console.log($(player).position());
+				}
+
+
+				function unlockUI(id){
+					console.log("UNLOCKING UI "+id);
+					$("#btnDice").attr("disabled", false);
+					$('#players').on("click","#player"+id+" img",function(){
+					var dice = $("#lbDice").text();
+						if(dice == 6){
+							//movePlayer(this.id,startPosX[playerId],startPosY[playerId]);
+							getOutPlayer(this.id);
+							//movePlayer(this.id,posMap[2].x,posMap[2].y);
+
+							lockUI(id);
+						}
+					});
+				}
+				function lockUI(id){
+					$("#btnDice").attr("disabled", true);
+					$('#players').off("click","#player"+id+" img");
+					console.log("UI "+id+" LOCKED");
+				}
+
 				document.onmousemove = function(e){
 					var x = e.pageX;
 					var y = e.pageY;
 					$("#mousepos").text("X is "+x+" and Y is "+y);
 				};
+
+
+
+				unlockUI(0);
+				//lockUI(0);
+
 			});
 		</script>
 		<style>
@@ -90,8 +192,7 @@
 		</style>
 	</head>
 	<body>
-		Mauspos:<span id="mousepos"></span>
-		<br>
+		Mauspos:<span id="mousepos"></span>		<br>
 		<div id='players'>
 		</div>
 		<img src='gamefield/' />
@@ -100,5 +201,7 @@
 		</form>
 		<br>
 		<input type="button" id="btnDice" value="Würfeln" /> <label for="btnDice" id="lbDice">6</label>
+		<br>
+		<a href="rules/" target="_blank" />Regeln</a>
 	</body>
 </html>
