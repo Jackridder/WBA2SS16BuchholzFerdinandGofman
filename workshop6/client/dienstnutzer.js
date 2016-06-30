@@ -80,7 +80,10 @@ io.sockets.on('connection', function(socket) {
            canMove = true;
          }
          canMove = true; //debug
-         allClients[currentPlayer].emit('move',{data:canMove,x:msg.x,y:msg.y});
+         allClients[currentPlayer].emit('move',{data:canMove,player:"player"+msg.figure+currentPlayer,x:msg.x,y:msg.y});
+         allClients[currentPlayer].emit('tokenremove',{data:currentPlayer});
+         currentPlayer = (currentPlayer+1)%4;
+         allClients[currentPlayer].emit('tokenadd',{data:currentPlayer});
 
        }
      });

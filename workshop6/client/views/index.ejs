@@ -141,7 +141,7 @@
 					lockUI();
 				});
 				socket.on('move',function (msg){
-					console.log("MOVE: Server: "+msg.data);
+					console.log("MOVE: Server: "+msg.data+" Player: "+msg.player);
 					if(msg.data==true){
 						movePlayer(msg.player,msg.x,msg.y);
 					}
