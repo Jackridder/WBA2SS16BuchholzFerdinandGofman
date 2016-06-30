@@ -160,25 +160,6 @@ app.put('/gamefield/home',bodyParser.urlencoded({extended:true}) ,function(req,r
           diceCount = 0;
         }
       }
-    }
-  //********************* Würfellogik home Ende *********************
-  }
-  //********************* Würfellogik goal Anfang *********************
-
-
-
-
-
-
-
-
-
-    if(lastDice == 6 && possibleMoves > 0) {
-      app.put('/gamefield/home', function(req, res)) {
-
-      }
-    }
-  }
 });
 
 //Würfelfunktion
