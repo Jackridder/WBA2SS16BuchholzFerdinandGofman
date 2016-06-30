@@ -30,7 +30,8 @@ for(var i=0; i<goalArray.length; i++) {
 app.get('/spielfigur/position',bodyParser.urlencoded({extended:true}) ,function(req, res){
   var id = req.body.id;
   //Figuren ID ermitteln
-  var figureID = id.substring(id.length-1);
+  var figureID = String(id).charAt(0);
+  //var figureID = id.charAt(id.length-1);
   //Alle Spielfelder durchlaufen
   for(var i = 0; i < possibleMoves.length; i++){
     //ID des Felds = Figuren ID -> Rückgabe
