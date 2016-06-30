@@ -4,9 +4,12 @@ var jsonParser = bodyParser.json();
 var app = express();
 app.listen(3000,function(){
     console.log("Server running on 3000");
+    app.use(bodyParser.urlencoded({extended:true}));
+    app.use(jsonParser);
 });
 
-app.use(jsonParser);
+
+
 
 var lastDice = 0;
 var possibleMoves = Array(40); // 40 Mögliche Spielfeldpositionen (ohne goal und home)
@@ -27,10 +30,10 @@ for(var i=0; i<goalArray.length; i++) {
 }
 
 //Spielfigurposition ermitteln
-app.get('/spielfigur/position',bodyParser.urlencoded({extended:true}) ,function(req, res){
+app.get('/spielfigur/position',function(req, res){
   var id = req.body.id;
   //Figuren ID ermitteln
-  var figureID = id.substring(id.length-1);
+  var figureID = String(id).charAt(0);
   //Alle Spielfelder durchlaufen
   for(var i = 0; i < possibleMoves.length; i++){
     //ID des Felds = Figuren ID -> Rückgabe
@@ -47,7 +50,7 @@ app.get('/spielfigur/position',bodyParser.urlencoded({extended:true}) ,function(
 app.get('gamefield/goal/position', function(req,res) {
   var id = req.body.id;
   //Figuren ID ermitteln
-  var figureID = id.substring(id.length-1);
+  var figureID = id.charAt(id.length-1);
   //Alle Goalfelder durchlaufen
   for(var i = 0; i < goalArray.length; i++){
     //ID des Felds = Figuren ID -> Rückgabe
@@ -67,7 +70,7 @@ app.get('/spielzug',function(req,res){
 app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
   var id = req.body.id;
   var playerID = id.charAt(id.length);
-  var figureID = id.substring(id.length-1);
+  var figureID = id.charAt(id.length-1);
   currentPosition = 0;
   //Finde aktuelle Position von Figur
   for(var i = 0; i < possibleMoves.length; i++){
@@ -102,7 +105,7 @@ app.put('/dice/number',bodyParser.urlencoded({extended:true}),function(req,res){
 
   //Spieler und Figuren ID ermitteln
   var playerID = id.charAt(id.length);
-  var figureID = id.substring(0,1);
+  var figureID = id.charAt(id.length-1);
   homeCount = 0;
   //Sind alle 4 Figuren in der Basis des gewählten Spielers, darf er 3 Mal würfeln
   for(var i=playerID*4; i<playerID*4+4; i++) {
