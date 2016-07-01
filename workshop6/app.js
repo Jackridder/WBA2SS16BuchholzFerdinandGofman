@@ -241,8 +241,8 @@ app.put('/gamefield/home',bodyParser.urlencoded({extended:true}) ,function(req,r
 function dice() {
   lastDice = Math.round(Math.random() * (6 - 1) + 1);
   //lastDice = 6;
-  for(var i=0;i<possibleMoves.length;i++)
-    console.log(possibleMoves[i]);
+  //for(var i=0;i<possibleMoves.length;i++)
+  //  console.log(possibleMoves[i]);
 }
 
 app.get('/gamefield/goal',function (req,res) {

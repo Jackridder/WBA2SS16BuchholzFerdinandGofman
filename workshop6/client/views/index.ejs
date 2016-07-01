@@ -22,7 +22,7 @@
 					posMap[i] = {x:startX+(50*i),y:startY};
 					//console.log("POSMAP: "+posMap[i].x+":"+posMap[i].y);
 				}
-				for(var i=0;i<=40;i++){ //Figurschleife
+				for(var i=0;i<=40;i++){ //PosMap Schleife des Todes
 					startX = 43;
 					startY = 233;
 					if(i>=5&&i<9){
@@ -82,13 +82,7 @@
 					console.log("EMIT dice");
 					socket.emit('dice');
 				});
-				var moveCounter = 0;
-				$('#btnMove').click(function(){
-					console.log("MOVE: ["+moveCounter+"] ");
-					dice = $("#lbDice").text();
-					moveToField(1,moveCounter);
-					moveCounter++;
-				});
+				
 
 
 
@@ -259,7 +253,6 @@
 		<img src='gamefield/' />
 		<br>
 		<input type="button" id="newGame" value="Spiel beitreten" />
-		<input type="button" id="btnMove" value="Bewegen" />
 
 		<br>
 		<input type="button" id="btnDice" value="Würfeln" /> <label for="btnDice" id="lbDice">6</label>
