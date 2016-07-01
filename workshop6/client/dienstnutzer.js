@@ -54,7 +54,11 @@ io.on('connection',function(socket){
     newPlayer();
   });
 });
-
+function nextRound(){
+  allClients[currentPlayer].emit('tokenremove',{data:currentPlayer});
+  currentPlayer = (currentPlayer+1)%allClients.length;
+  allClients[currentPlayer].emit('tokenadd',{data:currentPlayer});
+}
 io.sockets.on('connection', function(socket) {
   console.log("SOCKETS: new Socket");
    allClients.push(socket);
@@ -70,33 +74,43 @@ io.sockets.on('connection', function(socket) {
    });
    socket.on('movewish',function(msg){
      console.log("MOVEWISH: "+msg.figure);
-     request.put('http://localhost:3000/spielzug',{form:{id:msg.figure}}, function (error, response, body) {
-       if (!error && response.statusCode == 200) {
-         console.log("MOVEWISH ANSWER:"+body);
-         var canMove;
-         if(body==2){
-           canMove = false;
-         }else{
-           canMove = true;
-         }
-         canMove = true; //debug
-         allClients[currentPlayer].emit('move',{data:canMove,player:"player"+msg.figure+currentPlayer,x:msg.x,y:msg.y});
-         allClients[currentPlayer].emit('tokenremove',{data:currentPlayer});
-         currentPlayer = (currentPlayer+1)%4;
-         allClients[currentPlayer].emit('tokenadd',{data:currentPlayer});
 
+     request.put('http://localhost:3000/spielfigur/position',{form:{id:msg.figure}}, function (error, response, body) {
+       if (!error && response.statusCode == 200) {
+         if(body == 40){
+           socket.emit('getout',{data:true,figure:msg.figure,player:msg.player});
+           nextRound();
+         }else{
+           request.put('http://localhost:3000/spielzug',{form:{id:msg.figure}}, function (error, response, body) {
+             if (!error && response.statusCode == 200) {
+               console.log("MOVEWISH ANSWER:"+body);
+               var canMove;
+               if(body==2){
+                 canMove = false;
+               }else{
+                 canMove = true;
+               }
+               canMove = true; //debug
+               io.emit('movefield',{data:canMove,figure:msg.figure,position:body});
+               nextRound();
+             }
+           });
+         }
        }
      });
-   })
+
+   });
+
+
    socket.on('moved',function(msg){
      console.log("Player "+msg.data+" moved to X"+msg.x+" Y"+msg.y);
-     io.emit('move',{data:true,player:msg.data,x:msg.x,y:msg.y})
+     //io.emit('move',{data:true,player:msg.data,x:msg.x,y:msg.y})
      allClients[currentPlayer].emit('tokenremove',{data:currentPlayer});
      //Wie oft darf gewürfelt werden
      request.put('http://localhost:3000/dice/number',{form:{id:msg.data.charAt(msg.data.length)}}, function (error, response, body) {
        if (!error && response.statusCode == 200) {
          console.log("PUT:"+body);
-         currentPlayer = (currentPlayer+1)%4;
+         currentPlayer = (currentPlayer+1)%allClients.length;
          allClients[currentPlayer].emit('tokenadd',{data:currentPlayer});
        }
      });

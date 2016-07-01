@@ -9,20 +9,12 @@
 			var socket = io.connect('http://localhost:3001');
 			console.log(socket);
 			$( document ).ready(function() {
-
-				$('#newGame').click(function(){
-					console.log("EMIT join");
-					socket.emit('join');
-					$(this).attr("disabled", true);
-				});
-				$('#btnDice').click(function(){
-					console.log("EMIT dice");
-					socket.emit('dice');
-				});
-				socket.on('diced',function (msg){
-					console.log("dice result: "+msg.data);
-					$("#lbDice").text(msg.data);
-				});
+				//### INIT ###
+				document.onmousemove = function(e){
+					var x = e.pageX;
+					var y = e.pageY;
+					$("#mousepos").text("X is "+x+" and Y is "+y);
+				};
 				var posMap = {};
 				for(var i=0;i<40;i++){
 					var startX = 43;
@@ -30,52 +22,6 @@
 					posMap[i] = {x:startX+(50*i),y:startY};
 					//console.log("POSMAP: "+posMap[i].x+":"+posMap[i].y);
 				}
-				function addFigure(pId,fId,x,y){
-					//console.log("FIGADD "+pId+" "+fId+" "+x+" "+y);
-					$('#player'+pId).append("<img src='spielfigur/"+pId+"' class='player' id='player"+fId+pId+"'/>");
-					$('#player'+fId+pId).css({"position":"absolute","left":x,"top":y});
-
-				}
-				//Update player count
-				socket.on('players', function (msg) {
-					console.log("players: "+msg.data);
-					var c = msg.data;
-					var count = 0;
-
-					var homeMap = {};
-
-					$('#playcount').text(c);
-					$('#players').empty();
-					for(var j=0;j<c;j++){
-						var startX = 43+(j*450);
-						var startY = 25;
-						if(j==2){
-							var startX = 43;
-							var startY = 25+(j*225);
-						}
-						if(j==3){
-							var startX = 43+(j*150);
-							var startY = 25+(j*150);
-						}
-						$('#players').append("<div id='player"+j+"'/>");
-						//test();
-
-						for(var i=0;i<4;i++){ //Figurschleife
-
-							if(i==2){
-								startY+=55;
-								startX-=100;
-							}
-							addFigure(j,i,startX+(50*i),startY);
-							homeMap[count]= {'x':startX+(50*i),'y':startY};
-							count++;
-						}
-
-					}
-					if(msg.data==4)
-						socket.emit('initHome',{data:homeMap});
-			  });
-
 				for(var i=0;i<=40;i++){ //Figurschleife
 					startX = 43;
 					startY = 233;
@@ -103,20 +49,19 @@
 					}else if(i>=25 && i<29){
 						startX+=i*50+300;
 						startY+=50*i-1100;
-					}else if(i>=30 && i<32){
-						startX+=1750;
+					}else if(i>=29 && i<31){ // 30 32
+						startX+=1700;
 						startY=530;
-					}else if(i>=32 && i<36){
+					}else if(i>=31 && i<34){
 						startX+=i*50+200;
-						startY-=-1850+i*50;
-					}else if(i>=36&& i<40){
-						startX+=1950;
+						startY-=-1800+i*50;
+					}else if(i>=34 && i<39){
+						startX+=1900;
 						startY=330;
-					}else if(i==40){
-						startX=2043;
-						startY-=-2050+i*50;
+					}else if(i==39){
+						startX=1993;
+						startY-=-1995+i*50;
 					}
-
 					//$('#player'+j).append("<img src='spielfigur/"+j+"' class='player' id='player"+i+j+10+"'/>");
 					if(i<20){
 						posMap[i] = {x:startX+(50*i),y:startY};
@@ -127,6 +72,140 @@
 					}
 				}
 
+				//### BUTTON FUNCTIONS ###
+				$('#newGame').click(function(){
+					console.log("EMIT join");
+					socket.emit('join');
+					$(this).attr("disabled", true);
+				});
+				$('#btnDice').click(function(){
+					console.log("EMIT dice");
+					socket.emit('dice');
+				});
+				var moveCounter = 0;
+				$('#btnMove').click(function(){
+					console.log("MOVE: ["+moveCounter+"] ");
+					movePlayer(1,posMap[moveCounter].x,posMap[moveCounter].y);
+					moveCounter++;
+
+				});
+
+
+
+				//### FUNCTIONS ###
+				function addFigure(pId,fId,x,y){
+					fId++;
+					//console.log("FIGADD "+pId+" "+fId+" "+x+" "+y);
+					$('#player'+pId).append("<img src='spielfigur/"+pId+"' class='player' id='"+fId+"'/>");
+					$('#'+fId).css({"position":"absolute","left":x,"top":y});
+				}
+				function movePlayer(figure,x,y){
+					console.log("Move Figure "+figure+" to X "+x+" Y "+y);
+					var figure = "#"+figure;
+					$(figure).css({"left":x,"top":y});
+				}
+				function moveToField(figureID,fieldID){
+					var dice = $("#lbDice").text();
+					var x = posMap[fieldID+dice].x;
+					var y = posMap[fieldID+dice].y;
+					console.log("FIELDMOVE: Move Figure "+figure+" to X "+x+" Y "+y);
+					var figure = "#"+figure;
+					$(figure).css({"left":x,"top":y});
+				}
+
+				function getOutPlayer(player,figure){
+					//var startPosX = [43,345,245,545];
+					//var startPosY = [230,30,530,330];
+
+					console.log("GETOUT: playerId: "+player+" X "+posMap[player*10].x+" Y "+posMap[player*10].y);
+					//socket.emit('moved',{data:player,x:startPosX[playerId],y:startPosY[playerId]});
+					var figure = "#"+figure;
+					$(figure).css({"left":posMap[player*10].x,"top":posMap[player*10].y});
+
+				}
+				function unlockUI(id){
+					console.log("UNLOCKING UI "+id);
+					$("#btnDice").attr("disabled", false);
+					$('#players').on("click","#player"+id+" img",function(){
+						var dice = $("#lbDice").text();
+						//console.log("DELEGATE ");
+						fid = $(this).find("#player"+id+" img").prevObject[0].id;
+						//console.log(fid);
+
+
+						console.log("MOVEWISH EMIT");
+						socket.emit('movewish',{figure:fid,player:id});
+
+						if(dice == 6){
+							//movePlayer(this.id,startPosX[playerId],startPosY[playerId]);
+							//getOutPlayer(this.id);
+							//movePlayer(this.id,posMap[20].x,posMap[20].y);
+
+						}
+						lockUI(id);
+
+					});
+				}
+				//unlockUI(3);
+				function lockUI(id){
+					$("#btnDice").attr("disabled", true);
+					$('#players').off("click","#player"+id+" img");
+					console.log("UI "+id+" LOCKED");
+				}
+
+				function test(){
+					console.log("TEST");
+					for(var i=0;i<40;i++){
+						addFigure(0,i+100,posMap[i].x,posMap[i].y);
+					}
+				}
+
+
+				//### SOCKETS ###
+				//Update player count
+				socket.on('players', function (msg) {
+					console.log("players: "+msg.data);
+					var c = msg.data;
+					var count = 0;
+
+					var homeMap = {};
+
+					$('#playcount').text(c);
+					$('#players').empty();
+					for(var j=0;j<c;j++){
+						var startX = 43+(j*450);
+						var startY = 25;
+						if(j==2){ // Rot
+							var startX = 43+(j*225);
+							var startY = 25+(j*225);
+						}
+						if(j==3){ //Schwarz
+							var startX = 43;
+							var startY = 25+(j*150);
+						}
+						$('#players').append("<div id='player"+j+"'/>");
+						//test();
+
+						for(var i=0;i<4;i++){ //Figurschleife
+
+							if(i==2){
+								startY+=55;
+								startX-=100;
+							}
+							addFigure(j,count,startX+(50*i),startY);
+							homeMap[count]= {'x':startX+(50*i),'y':startY};
+							count++;
+						}
+
+					}
+					//test();
+					if(msg.data==4)
+						socket.emit('initHome',{data:homeMap});
+			  });
+				socket.on('diced',function (msg){
+					console.log("dice result: "+msg.data);
+					$("#lbDice").text(msg.data);
+				});
 				socket.on('left',function (msg){
 					console.log("LEFT");
 					for(var i=0;i<4;i++)
@@ -138,72 +217,29 @@
 				});
 				socket.on('tokenremove',function (msg){
 					console.log("TOKEN: Runde vorbei! Ich bin Spieler "+msg.data);
-					lockUI();
+					lockUI(msg.data);
 				});
 				socket.on('move',function (msg){
-					console.log("MOVE: Server: "+msg.data+" Player: "+msg.player);
+					console.log("MOVE: Server: "+msg.data+" Figure: "+msg.figure);
 					if(msg.data==true){
-						movePlayer(msg.player,msg.x,msg.y);
+						movePlayer(msg.figure,msg.x,msg.y);
 					}
 				});
-				function movePlayer(player,x,y){
-					console.log("Move Player "+player+" to X "+x+" Y "+y);
-					var player = "#"+player;
-					$(player).css({"left":x,"top":y});
-				}
-				function getOutPlayer(player){
-					var startPosX = [43,345,245,545];
-					var startPosY = [230,30,530,330];
-					var playerId = player.charAt(player.length-1);
-					console.log("playerId: "+playerId+" X "+startPosX[playerId]+" Y "+startPosY[playerId]);
-					socket.emit('moved',{data:player,x:startPosX[playerId],y:startPosY[playerId]});
-					var player = "#"+player;
-					$(player).css({"left":startPosX[playerId],"top":startPosY[playerId]});
-					console.log($(player).position());
-				}
-
-
-				function unlockUI(id){
-					console.log("UNLOCKING UI "+id);
-					$("#btnDice").attr("disabled", false);
-					$('#players').on("click","#player"+id+" img",function(){
-						var dice = $("#lbDice").text();
-						id = ($(this).find("#player"+id+" img").prevObject[0].id.charAt($(this).find("#player"+id+" img").prevObject[0].id.length-2));
-						socket.emit('movewish',{figure:id,x:posMap[0].x,y:posMap[0].y});
-
-						if(dice == 6){
-							//movePlayer(this.id,startPosX[playerId],startPosY[playerId]);
-							//getOutPlayer(this.id);
-							//movePlayer(this.id,posMap[20].x,posMap[20].y);
-
-							lockUI(id);
-						}
-					});
-				}
-				function lockUI(id){
-					$("#btnDice").attr("disabled", true);
-					$('#players').off("click","#player"+id+" img");
-					console.log("UI "+id+" LOCKED");
-				}
-
-				document.onmousemove = function(e){
-					var x = e.pageX;
-					var y = e.pageY;
-					$("#mousepos").text("X is "+x+" and Y is "+y);
-				};
-
-
-
-				unlockUI(0);
-				//lockUI(0);
-
-				function test(){
-					for(var i=0;i<=40;i++){
-						addFigure(0,i+10,posMap[i].x,posMap[i].y);
+				socket.on('movefield',function (msg){
+					console.log("MOVEFIELD: Server: "+msg.data+" Figure: "+msg.figure+" Cur.Pos: "+msg.position);
+					if(msg.data==true){
+						moveToField(msg.figure,msg.position);
 					}
-				}
+				});
+				socket.on('getout',function (msg){
+					console.log("GETOUT: Player: "+msg.player+" Figure: "+msg.figure);
+					if(msg.data==true){
+						getOutPlayer(msg.player,msg.figure);
+						//moveToField(msg.figure,msg.player*10);
+					}
+				});
 
-				console.log("test");
+
 			});
 		</script>
 		<style>
@@ -215,9 +251,10 @@
 		<div id='players'>
 		</div>
 		<img src='gamefield/' />
-		<form method="POST">
-			<input type="button" id="newGame" value="Spiel beitreten" />
-		</form>
+		<br>
+		<input type="button" id="newGame" value="Spiel beitreten" />
+		<input type="button" id="btnMove" value="Bewegen" />
+
 		<br>
 		<input type="button" id="btnDice" value="Würfeln" /> <label for="btnDice" id="lbDice">6</label>
 		<br>
