@@ -81,6 +81,7 @@ app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
   var playerID = getPlayerID(figureID);
   console.log("SPIELZUG: Fig: "+figureID+ " Player: "+playerID);
   currentPosition = 0;
+
   //Finde aktuelle Position von Figur
   for(var i = 0; i < possibleMoves.length; i++){
     if(possibleMoves[i] == figureID){
@@ -90,6 +91,9 @@ app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
   }
   //Ist das Feld leer wird eine 0 zurückgegeben
   if(possibleMoves[currentPosition+lastDice] == 0){
+    possibleMoves[currentPosition+lastDice] = figureID;
+    possibleMoves[currentPosition] = 0;
+
     res.end("0");
   }
   //Ist das Feld durch eine eigene Figur besetzt, wird eine 1 zurückgegeben
@@ -99,6 +103,8 @@ app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
     }
   }
   //Ist das Feld durch einen Gegner besetzt, wird eine 2 zurückgegeben
+  possibleMoves[currentPosition+lastDice] = figureID;
+  possibleMoves[currentPosition] = 0;
   res.end("2");
 });
 
@@ -194,6 +200,8 @@ app.put('/gamefield/neutral',bodyParser.urlencoded({extended:true}),function (re
 for(var i = 0; i < possibleMoves.length; i++){
   if(possibleMoves[i] == figureID){
     currentPosition = i;
+    console.log("CurrentPos:"+currentPosition);
+    console.log("possibleMoves:"+possibleMoves[i]);
   }
 }
 console.log("ziel:"+(lastDice*1.0+currentPosition*1.0));
