@@ -38,6 +38,7 @@ app.put('/spielfigur/position',bodyParser.urlencoded({extended:true}) ,function(
   //var figureID = id.charAt(id.length-1);
   //Alle Spielfelder durchlaufen
   for(var i = 0; i < possibleMoves.length; i++){
+    console.log("Auf Spielfeld " + i + " befindet sich die Figur" + possibleMoves[i]);
     //ID des Felds = Figuren ID -> Rückgabe
     if(possibleMoves[i] == figureID){
       console.log("Spieler "+figureID+" befindet sich auf "+i);
@@ -136,7 +137,7 @@ app.put('/dice/number',bodyParser.urlencoded({extended:true}),function(req,res){
           res.end("3");
           //Ansonsten darf er nur 1 Mal würfeln
     }else {
-      red.end("1");
+      res.end("1");
     }
   }
 });
@@ -207,6 +208,7 @@ app.put('/gamefield/home',bodyParser.urlencoded({extended:true}) ,function(req,r
       if(lastDice == 6 && possibleMoves[playerID*10] == 0) {
         //Spielfigur auf erstes Feld stellen
         possibleMoves[playerID*10] = figureID;
+        console.log("PlayerID: "+playerID+" PlayerID*10 " + playerID*10);
         console.log("Home erfolgreich verlassen: "+possibleMoves[playerID*10]);
         res.end("true");
       }
