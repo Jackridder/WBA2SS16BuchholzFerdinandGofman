@@ -85,9 +85,9 @@
 				var moveCounter = 0;
 				$('#btnMove').click(function(){
 					console.log("MOVE: ["+moveCounter+"] ");
-					movePlayer(1,posMap[moveCounter].x,posMap[moveCounter].y);
+					dice = $("#lbDice").text();
+					moveToField(1,moveCounter);
 					moveCounter++;
-
 				});
 
 
@@ -105,11 +105,13 @@
 					$(figure).css({"left":x,"top":y});
 				}
 				function moveToField(figureID,fieldID){
-					var dice = $("#lbDice").text();
-					var x = posMap[fieldID+dice].x;
-					var y = posMap[fieldID+dice].y;
-					console.log("FIELDMOVE: Move Figure "+figure+" to X "+x+" Y "+y);
-					var figure = "#"+figure;
+					fieldID = parseInt(fieldID);
+
+					var x = posMap[fieldID].x;
+					var y = posMap[fieldID].y;
+					console.log("FIELDMOVE: FIELDID: "+fieldID+" Move Figure "+figureID+" to X "+x+" Y "+y);
+
+					var figure = "#"+figureID;
 					$(figure).css({"left":x,"top":y});
 				}
 
@@ -146,7 +148,6 @@
 
 					});
 				}
-				//unlockUI(3);
 				function lockUI(id){
 					$("#btnDice").attr("disabled", true);
 					$('#players').off("click","#player"+id+" img");
@@ -199,8 +200,8 @@
 
 					}
 					//test();
-					if(msg.data==4)
-						socket.emit('initHome',{data:homeMap});
+					//moveToField(3,3);
+					//getOutPlayer(1,5);
 			  });
 				socket.on('diced',function (msg){
 					console.log("dice result: "+msg.data);
@@ -213,10 +214,12 @@
 				});
 				socket.on('tokenadd',function (msg){
 					console.log("TOKEN: Meine Runde! Ich bin Spieler "+msg.data);
+					$("#currentPlayer").text("Ich bin an der Reihe!");
 					unlockUI(msg.data);
 				});
 				socket.on('tokenremove',function (msg){
 					console.log("TOKEN: Runde vorbei! Ich bin Spieler "+msg.data);
+					$("#currentPlayer").text("");
 					lockUI(msg.data);
 				});
 				socket.on('move',function (msg){
@@ -228,7 +231,9 @@
 				socket.on('movefield',function (msg){
 					console.log("MOVEFIELD: Server: "+msg.data+" Figure: "+msg.figure+" Cur.Pos: "+msg.position);
 					if(msg.data==true){
-						moveToField(msg.figure,msg.position);
+						var dice = parseInt($("#lbDice").text());
+						console.log("MOVEFIELD TEST: "+dice+" "+msg.position);
+						moveToField(msg.figure,msg.position+dice);
 					}
 				});
 				socket.on('getout',function (msg){
@@ -244,10 +249,11 @@
 		</script>
 		<style>
 			.player{width:30px;height:auto;}
+			#currentPlayer{color:red;font-weight:bold;}
 		</style>
 	</head>
 	<body>
-		Mauspos:<span id="mousepos"></span>		<br>
+		<span id="currentPlayer"></span>	<br>
 		<div id='players'>
 		</div>
 		<img src='gamefield/' />

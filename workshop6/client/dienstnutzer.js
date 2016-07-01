@@ -36,12 +36,6 @@ function startGame(){
 io.on('connection',function(socket){
   console.log("IO: Socket verbunden");
 
-  socket.on('initHome',function(msg){
-    console.log("INITHOME");
-
-    //console.log("POSMAP: "+msg.data);
-  })
-
   socket.on('join',function(){
     console.log("Player joined");
     newPlayer();
@@ -51,7 +45,7 @@ io.on('connection',function(socket){
 
   socket.on('abort',function(){
     console.log("Player aborted");
-    newPlayer();
+    abortGame();
   });
 });
 function nextRound(){
@@ -77,13 +71,12 @@ io.sockets.on('connection', function(socket) {
 
      request.put('http://localhost:3000/spielfigur/position',{form:{id:msg.figure}}, function (error, response, body) {
        if (!error && response.statusCode == 200) {
+         console.log("MOVEWISH: position "+body);
          if(body == 40){
-           socket.emit('getout',{data:true,figure:msg.figure,player:msg.player});
-           nextRound();
-         }else{
-           request.put('http://localhost:3000/spielzug',{form:{id:msg.figure}}, function (error, response, body) {
+           console.log("Bewegte Figur ist in home");
+           request.put('http://localhost:3000/gamefield/home',{form:{id:msg.figure}}, function (error, response, body) {
              if (!error && response.statusCode == 200) {
-               console.log("MOVEWISH ANSWER:"+body);
+               console.log("MOVEWISH HOME ANSWER:"+body);
                var canMove;
                if(body==2){
                  canMove = false;
@@ -91,6 +84,22 @@ io.sockets.on('connection', function(socket) {
                  canMove = true;
                }
                canMove = true; //debug
+               io.emit('getout',{data:canMove,figure:msg.figure,player:msg.player});
+               nextRound();
+             }
+           });
+
+         }else{
+           request.put('http://localhost:3000/spielzug',{form:{id:msg.figure}}, function (error, response, body) {
+             if (!error && response.statusCode == 200) {
+               console.log("MOVEWISH NEUTRAL ANSWER:"+body);
+               var canMove;
+               if(body==2){
+                 canMove = false;
+               }else{
+                 canMove = true;
+               }
+               //canMove = true; //debug
                io.emit('movefield',{data:canMove,figure:msg.figure,position:body});
                nextRound();
              }
