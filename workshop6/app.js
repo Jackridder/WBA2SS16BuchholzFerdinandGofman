@@ -203,15 +203,13 @@ res.end("true");
 
 app.get('/gamefield/home',function (req,res) {
   //Basis Array: 0 = frei 1 = belegt
-  for(var i=0; i<homeArray.length; i++) {
-    homeArray[i] = 1;
-  }
+  //Noch ohne Sinn
 });
 
 app.put('/gamefield/home',bodyParser.urlencoded({extended:true}) ,function(req,res){
   var id = req.body.id;
-  var playerID = id.charAt(1);
-  var figureID = id.charAt(0);
+  var figureID = String(id);
+  playerID = getPlayerID(figureID);
   console.log(req.body);
   console.log("Spieler "+playerID+ " versucht Figur "+figureID+" aus home zu bewegen");
   //CurrentPosition an Dienstnutzer übergeben von der Figur,
