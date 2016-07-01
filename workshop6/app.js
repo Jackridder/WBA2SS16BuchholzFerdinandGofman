@@ -27,7 +27,7 @@ for(var i=0; i<goalArray.length; i++) {
   goalArray[i] = 0;
 }
 for(var i=0; i<homeArray.length; i++) {
-  homeArray[i] = 1;
+  homeArray[i] = i+1;
 }
 //
 //TESTFALL: possibleMoves[12] = 13;
@@ -210,17 +210,19 @@ app.put('/gamefield/home',bodyParser.urlencoded({extended:true}) ,function(req,r
   var id = req.body.id;
   var figureID = String(id);
   playerID = getPlayerID(figureID);
+  lastDice = 6;
   console.log(req.body);
   console.log("Spieler "+playerID+ " versucht Figur "+figureID+" aus home zu bewegen");
   //CurrentPosition an Dienstnutzer übergeben von der Figur,
   //um die Figur zu bewegen
   //Server muss bei jedem Klick abfragen ob Zug möglich Ist
-  for(var i=playerID*4; i<=playerID*4+3;i++) {
-    if(homeArray[i] >= playerID*4 && homeArray[i] <= playerID*4+3){
+  for(var i=playerID*4+1; i<=playerID*4+4;i++) {
+    if(homeArray[i-1] >= playerID*4+1 && homeArray[i-1] <= playerID*4+4){
       //6 Gewürfelt(kein Zug möglich)->ausgewählte FigurID aus home auf Startfeld
       if(lastDice == 6 && possibleMoves[playerID*10] == 0) {
         //Spielfigur auf erstes Feld stellen
         possibleMoves[playerID*10] = figureID;
+        homeArray[i-1] = 0;
         console.log("PlayerID: "+playerID+" PlayerID*10 " + playerID*10);
         console.log("Home erfolgreich verlassen: "+possibleMoves[playerID*10]);
         res.end("true");
