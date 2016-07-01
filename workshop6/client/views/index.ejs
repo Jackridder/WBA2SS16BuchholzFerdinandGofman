@@ -82,7 +82,7 @@
 					console.log("EMIT dice");
 					socket.emit('dice');
 				});
-				
+
 
 
 
@@ -100,7 +100,7 @@
 				}
 				function moveToField(figureID,fieldID){
 					fieldID = parseInt(fieldID);
-
+					console.log("FIELDID: "+fieldID);
 					var x = posMap[fieldID].x;
 					var y = posMap[fieldID].y;
 					console.log("FIELDMOVE: FIELDID: "+fieldID+" Move Figure "+figureID+" to X "+x+" Y "+y);
@@ -226,8 +226,9 @@
 					console.log("MOVEFIELD: Server: "+msg.data+" Figure: "+msg.figure+" Cur.Pos: "+msg.position);
 					if(msg.data==true){
 						var dice = parseInt($("#lbDice").text());
+						var pos = parseInt(msg.position);
 						console.log("MOVEFIELD TEST: "+dice+" "+msg.position);
-						moveToField(msg.figure,msg.position+dice);
+						moveToField(msg.figure,pos+dice);
 					}
 				});
 				socket.on('getout',function (msg){
@@ -255,7 +256,7 @@
 		<input type="button" id="newGame" value="Spiel beitreten" />
 
 		<br>
-		<input type="button" id="btnDice" value="Würfeln" /> <label for="btnDice" id="lbDice">6</label>
+		<input type="button" id="btnDice" value="Würfeln" /> <label for="btnDice" id="lbDice">0</label>
 		<br>
 		<a href="rules/" target="_blank" />Regeln</a>
 	</body>
