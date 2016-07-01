@@ -36,7 +36,7 @@ app.put('/spielfigur/position',bodyParser.urlencoded({extended:true}) ,function(
   var id = req.body.id;
   //Figuren ID ermitteln
   var figureID = String(id);
-  console.log("POSITION:"+figureID);
+  console.log("POSITION Figur:"+figureID);
   //var figureID = id.charAt(id.length-1);
   //Alle Spielfelder durchlaufen
   for(var i = 0; i < possibleMoves.length; i++){
@@ -77,8 +77,9 @@ app.get('/spielzug',function(req,res){
 // nicht besetzt = 0, durch sich selbst besetzt = 1, durch Gegner besetzt = 2
 app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
   var id = req.body.id;
-  var playerID = id.charAt(id.length);
-  var figureID = id.substring(id.length-1);
+  var figureID = String(id);
+  var playerID = getPlayerID(figureID);
+  console.log("SPIELZUG: Fig: "+figureID+ " Player: "+playerID);
   currentPosition = 0;
   //Finde aktuelle Position von Figur
   for(var i = 0; i < possibleMoves.length; i++){
@@ -226,7 +227,11 @@ app.put('/gamefield/home',bodyParser.urlencoded({extended:true}) ,function(req,r
         console.log("PlayerID: "+playerID+" PlayerID*10 " + playerID*10);
         console.log("Home erfolgreich verlassen: "+possibleMoves[playerID*10]);
         res.end("true");
+      }else{
+        console.log("FALSE: LastDice: "+lastDice+" Possiblemoves: "+ possibleMoves[playerID*10]);
       }
+    }else{
+      console.log("FALSE: homeArray["+i+"] "+homeArray[i]+" PlayerID "+playerID);
     }
   }
     res.end("false");
@@ -236,6 +241,8 @@ app.put('/gamefield/home',bodyParser.urlencoded({extended:true}) ,function(req,r
 function dice() {
   lastDice = Math.round(Math.random() * (6 - 1) + 1);
   //lastDice = 6;
+  for(var i=0;i<possibleMoves.length;i++)
+    console.log(possibleMoves[i]);
 }
 
 app.get('/gamefield/goal',function (req,res) {
