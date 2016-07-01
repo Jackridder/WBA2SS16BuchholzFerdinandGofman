@@ -109,14 +109,16 @@ app.get('/dice',function (req,res){
 app.put('/dice/number',bodyParser.urlencoded({extended:true}),function(req,res){
   var id = req.body.id;
   console.log(req.body.id);
+  for(var i=0; i<homeArray.length;i++){
+    homeArray[i]=i;
+  }
 
-  //Spieler und Figuren ID ermitteln
-  var playerID = id;
-  //var figureID = id.substring(0,1);
+  //Spieler ermitteln
+  var playerID = id.substring(0,1);
   homeCount = 0;
   //Sind alle 4 Figuren in der Basis des gewählten Spielers, darf er 3 Mal würfeln
   for(var i=playerID*4; i<playerID*4+4; i++) {
-    if(homeArray[i] == 1) {
+    if(homeArray[i] >= playerID*4 && homeArray[i] <= playerID*4+3) {
       homeCount++;
     }
     if(homeCount == 4) {
@@ -202,8 +204,8 @@ app.put('/gamefield/home',bodyParser.urlencoded({extended:true}) ,function(req,r
   //CurrentPosition an Dienstnutzer übergeben von der Figur,
   //um die Figur zu bewegen
   //Server muss bei jedem Klick abfragen ob Zug möglich Ist
-  //
-    if(homeArray[figureID] == 1){
+  for(var i=playerID*4; i<=playerID*4+3;i++) {
+    if(homeArray[i] >= playerID*4 && homeArray[i] <= playerID*4+3){
       //6 Gewürfelt(kein Zug möglich)->ausgewählte FigurID aus home auf Startfeld
       if(lastDice == 6 && possibleMoves[playerID*10] == 0) {
         //Spielfigur auf erstes Feld stellen
@@ -212,11 +214,9 @@ app.put('/gamefield/home',bodyParser.urlencoded({extended:true}) ,function(req,r
         console.log("Home erfolgreich verlassen: "+possibleMoves[playerID*10]);
         res.end("true");
       }
-      //6 Gewürfelt und Startfeld belegt
-      else{
-        res.end("false");
-      }
     }
+  }
+    res.end("false");
 });
 
 //Würfelfunktion
