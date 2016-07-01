@@ -103,8 +103,8 @@ app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
     }
   }
   //Ist das Feld durch einen Gegner besetzt, wird eine 2 zurückgegeben
-  possibleMoves[currentPosition+lastDice] = figureID;
-  possibleMoves[currentPosition] = 0;
+  //possibleMoves[currentPosition+lastDice] = figureID;
+  //possibleMoves[currentPosition] = 0;
   res.end("2");
 });
 
