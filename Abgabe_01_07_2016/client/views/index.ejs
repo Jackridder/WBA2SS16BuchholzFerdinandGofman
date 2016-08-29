@@ -22,7 +22,7 @@
 					posMap[i] = {x:startX+(50*i),y:startY};
 					//console.log("POSMAP: "+posMap[i].x+":"+posMap[i].y);
 				}
-				for(var i=0;i<=40;i++){ //PosMap Schleife des Todes
+				for(var i=0;i<=40;i++){ //Figurschleife
 					startX = 43;
 					startY = 233;
 					if(i>=5&&i<9){
@@ -82,7 +82,13 @@
 					console.log("EMIT dice");
 					socket.emit('dice');
 				});
-
+				var moveCounter = 0;
+				$('#btnMove').click(function(){
+					console.log("MOVE: ["+moveCounter+"] ");
+					dice = $("#lbDice").text();
+					moveToField(1,moveCounter);
+					moveCounter++;
+				});
 
 
 
@@ -100,7 +106,7 @@
 				}
 				function moveToField(figureID,fieldID){
 					fieldID = parseInt(fieldID);
-					console.log("FIELDID: "+fieldID);
+
 					var x = posMap[fieldID].x;
 					var y = posMap[fieldID].y;
 					console.log("FIELDMOVE: FIELDID: "+fieldID+" Move Figure "+figureID+" to X "+x+" Y "+y);
@@ -226,13 +232,12 @@
 					console.log("MOVEFIELD: Server: "+msg.data+" Figure: "+msg.figure+" Cur.Pos: "+msg.position);
 					if(msg.data==true){
 						var dice = parseInt($("#lbDice").text());
-						var pos = parseInt(msg.position);
 						console.log("MOVEFIELD TEST: "+dice+" "+msg.position);
-						moveToField(msg.figure,pos+dice);
+						moveToField(msg.figure,msg.position+dice);
 					}
 				});
 				socket.on('getout',function (msg){
-					console.log("GETOUT: Player: "+msg.player+" Figure: "+msg.figure+ " Check: "+msg.data);
+					console.log("GETOUT: Player: "+msg.player+" Figure: "+msg.figure);
 					if(msg.data==true){
 						getOutPlayer(msg.player,msg.figure);
 						//moveToField(msg.figure,msg.player*10);
@@ -254,9 +259,10 @@
 		<img src='gamefield/' />
 		<br>
 		<input type="button" id="newGame" value="Spiel beitreten" />
+		<input type="button" id="btnMove" value="Bewegen" />
 
 		<br>
-		<input type="button" id="btnDice" value="Würfeln" /> <label for="btnDice" id="lbDice">0</label>
+		<input type="button" id="btnDice" value="Würfeln" /> <label for="btnDice" id="lbDice">6</label>
 		<br>
 		<a href="rules/" target="_blank" />Regeln</a>
 	</body>
