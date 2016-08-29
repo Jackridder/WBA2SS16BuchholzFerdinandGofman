@@ -69,16 +69,23 @@ io.sockets.on('connection', function(socket) {
    socket.on('movewish',function(msg){
      console.log("MOVEWISH: "+msg.figure);
 
-     request.put('http://localhost:3000/spielfigur/position',{form:{id:msg.figure}}, function (error, response, body) {
+     request.put('http://localhost:3000/spielfigur/position',{form:{id:msg.figure}}, function (error, response, pos) {
        if (!error && response.statusCode == 200) {
-         console.log("MOVEWISH: position "+body);
-         if(body == 40){
+         console.log("MOVEWISH: position "+pos);
+         if(pos == 40){
            console.log("Bewegte Figur ist in home");
            request.put('http://localhost:3000/gamefield/home',{form:{id:msg.figure}}, function (error, response, body) {
              if (!error && response.statusCode == 200) {
-               console.log("PLAYER "+msg.figure +" MOVEWISH HOME ANSWER:"+body);
-
-               io.emit('getout',{data:body,figure:msg.figure,player:msg.player});
+               //console.log("MOVEWISH HOME ANSWER:"+body);
+               var canMove;
+               if(body==2){
+                 canMove = false;
+               }else{
+                 canMove = true;
+               }
+               canMove = true; //debug
+               console.log("MOVEWISH: emit GETOUT");
+               io.emit('getout',{data:canMove,figure:msg.figure,player:msg.player});
                nextRound();
              }
            });
@@ -94,7 +101,9 @@ io.sockets.on('connection', function(socket) {
                  canMove = true;
                }
                //canMove = true; //debug
-               io.emit('movefield',{data:canMove,figure:msg.figure,position:body});
+               console.log("MOVEWISH: emit movefield");
+
+               io.emit('movefield',{data:canMove,figure:msg.figure,position:pos});
                nextRound();
              }
            });

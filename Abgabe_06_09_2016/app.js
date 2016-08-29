@@ -1,3 +1,13 @@
+var express = require('express');
+var bodyParser = require('body-parser');
+var jsonParser = bodyParser.json();
+var app = express();
+app.listen(3000,function(){
+    console.log("Server running on 3000");
+});
+
+app.use(jsonParser);
+
 var lastDice = 0;
 var possibleMoves = Array(40); // 40 Mögliche Spielfeldpositionen (ohne goal und home)
 var homeArray = Array(16); // Home der Spielfiguren
@@ -19,19 +29,6 @@ for(var i=0; i<goalArray.length; i++) {
 for(var i=0; i<homeArray.length; i++) {
   homeArray[i] = i+1;
 }
-
-var express = require('express');
-var bodyParser = require('body-parser');
-var jsonParser = bodyParser.json();
-var app = express();
-app.listen(3000,function(){
-    console.log("Server running on 3000");
-});
-
-app.use(jsonParser);
-
-
-
 //
 //TESTFALL: possibleMoves[12] = 13;
 //Spielfigurposition ermitteln
@@ -222,7 +219,7 @@ app.put('/gamefield/home',bodyParser.urlencoded({extended:true}) ,function(req,r
   var id = req.body.id;
   var figureID = String(id);
   playerID = getPlayerID(figureID);
-  //lastDice = 6;
+  lastDice = 6;
   console.log(req.body);
   console.log("Spieler "+playerID+ " versucht Figur "+figureID+" aus home zu bewegen");
   //CurrentPosition an Dienstnutzer übergeben von der Figur,
@@ -239,7 +236,7 @@ app.put('/gamefield/home',bodyParser.urlencoded({extended:true}) ,function(req,r
         console.log("Home erfolgreich verlassen: "+possibleMoves[playerID*10]);
         res.end("true");
       }else{
-        console.log("FALSE: LastDice: "+lastDice+" possibleMoves: "+ possibleMoves[playerID*10]);
+        console.log("FALSE: LastDice: "+lastDice+" Possiblemoves: "+ possibleMoves[playerID*10]);
       }
     }else{
       console.log("FALSE: homeArray["+i+"] "+homeArray[i]+" PlayerID "+playerID);
