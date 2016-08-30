@@ -107,18 +107,20 @@ io.sockets.on('connection', function(socket) {
                   io.emit('movefield',{data:true,figure:msg.figure,position:pos});
                   break;
                  case 3:
-                 app.get('/gamefield/goal/position',function (req,res) {
+                  app.get('/gamefield/goal/position',function (req,res) {
                     if(req.body==false)
                         io.emit('movegoal',{data:false,figure:msg.figure,position:req.body});
                     else
                         io.emit('movegoal',{data:true,figure:msg.figure,position:req.body});
-                 }
+                  });
+                    break;
+
                  case 1: // Feld besetzt
                  case 4: // Goal besetzt
+                 console.log("Feld oder Ziel ist besetzt.");
                   io.emit('movefield',{data:false,figure:msg.figure,position:pos});
                   break;
-                 default:
-                  io.emit('movefield',{data:false,figure:msg.figure,position:pos});
+
                }
 
                console.log("MOVEWISH: emit movefield");

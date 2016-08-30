@@ -143,6 +143,14 @@
 					$(figure).css({"left":posMap[player*10].x,"top":posMap[player*10].y});
 
 				}
+
+				function moveToGoal(figure,goal){
+					console.log("MOVETOGOAL: figure: "+figure+" Goal: "+goal);
+					var figure = "#"+figure;
+					$(figure).css({"left":goalMap[goal].x,"top":goalMap[goal].y});
+					//console.log(goalMap[goal]);
+				}
+
 				function unlockUI(id){
 					console.log("UNLOCKING UI "+id);
 					$("#btnDice").attr("disabled", false);
@@ -220,6 +228,7 @@
 
 					}
 					//test();
+					//moveToGoal(1,2);
 					//moveToField(3,3);
 					//getOutPlayer(1,5);
 			  });
@@ -261,6 +270,13 @@
 					console.log("GETOUT: Player: "+msg.player+" Figure: "+msg.figure);
 					if(msg.data==true){
 						getOutPlayer(msg.player,msg.figure);
+						//moveToField(msg.figure,msg.player*10);
+					}
+				});
+				socket.on('movegoal',function (msg){
+					console.log("MOVEGOAL: Player: "+msg.player+" Figure: "+msg.figure);
+					if(msg.data==true){
+						moveToGoal(msg.figure,msg.position);
 						//moveToField(msg.figure,msg.player*10);
 					}
 				});

@@ -145,7 +145,7 @@ app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
     res.end("4");
   }
   //Ist das Feld leer wird eine 0 zurückgegeben
-  if((possibleMoves[currentPosition+lastDice] == 0) && used{
+  if((possibleMoves[currentPosition+lastDice] == 0)){
     console.log("normaler Zug");
     possibleMoves[currentPosition+lastDice] = figureID;
     possibleMoves[currentPosition] = 0;
