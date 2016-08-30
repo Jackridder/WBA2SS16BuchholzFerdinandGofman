@@ -92,18 +92,37 @@ io.sockets.on('connection', function(socket) {
 
          }else{
            request.put('http://localhost:3000/spielzug',{form:{id:msg.figure}}, function (error, response, body) {
+             /*
+                0 = Feld frei
+                1 = Eigene Figur besetzt
+                2 = Fremde Figur besetzt
+                3 = Goal frei
+                4 = Goal besetzt
+             */
              if (!error && response.statusCode == 200) {
                console.log("MOVEWISH NEUTRAL ANSWER:"+body);
-               var canMove;
-               if(body==2){
-                 canMove = false;
-               }else{
-                 canMove = true;
+               switch(body){
+                 case 0:
+                 case 2:
+                  io.emit('movefield',{data:true,figure:msg.figure,position:pos});
+                  break;
+                 case 3:
+                 app.get('/gamefield/goal/position',function (req,res) {
+                    if(req.body==false)
+                        io.emit('movegoal',{data:false,figure:msg.figure,position:req.body});
+                    else
+                        io.emit('movegoal',{data:true,figure:msg.figure,position:req.body});
+                 }
+                 case 1: // Feld besetzt
+                 case 4: // Goal besetzt
+                  io.emit('movefield',{data:false,figure:msg.figure,position:pos});
+                  break;
+                 default:
+                  io.emit('movefield',{data:false,figure:msg.figure,position:pos});
                }
-               //canMove = true; //debug
+
                console.log("MOVEWISH: emit movefield");
 
-               io.emit('movefield',{data:canMove,figure:msg.figure,position:pos});
                nextRound();
              }
            });

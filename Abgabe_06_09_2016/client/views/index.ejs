@@ -16,12 +16,9 @@
 					$("#mousepos").text("X is "+x+" and Y is "+y);
 				};
 				var posMap = {};
-				for(var i=0;i<40;i++){
-					var startX = 43;
-					var startY = 230;
-					posMap[i] = {x:startX+(50*i),y:startY};
-					//console.log("POSMAP: "+posMap[i].x+":"+posMap[i].y);
-				}
+				var homeMap = {};
+				var goalMap = {};
+
 				for(var i=0;i<=40;i++){ //PosMap Schleife des Todes
 					startX = 43;
 					startY = 233;
@@ -36,8 +33,6 @@
 						startX-=(i*50)-300;
 					}else if(i==14){
 						startX-=(i*50)-300;
-					}else if(i>=15 && i<19){
-						startX+=(i)-417;
 					}else if(i>=15 && i<19){
 						startX+=(i)-417;
 					}else if(i==19){
@@ -62,6 +57,35 @@
 						startX=1993;
 						startY-=-1995+i*50;
 					}
+
+					// Goal map füllen
+					var goalX = 93;
+					var goalY = 280;
+					if(i>=4 && i<8){
+						goalY = -120;
+						goalX = 293;
+
+					}else if(i>=8 && i<12){
+						goalX = 843;
+						goalY = 280;
+						goalX += 50;
+					}
+					else if(i>=12 && i<16){
+						goalY = 1080;
+						goalX = 293;
+					}
+
+					if(i<4)
+						goalMap[i] = {x:goalX+(50*i),y:goalY};
+					else if(i>=4 && i<8)
+						goalMap[i] = {x:goalX,y:goalY+(50*i)};
+					else if(i>=8 && i<12)
+						goalMap[i] = {x:goalX-(50*i),y:goalY};
+					else
+						goalMap[i] = {x:goalX,y:goalY-(50*i)};
+
+
+
 					//$('#player'+j).append("<img src='spielfigur/"+j+"' class='player' id='player"+i+j+10+"'/>");
 					if(i<20){
 						posMap[i] = {x:startX+(50*i),y:startY};
@@ -151,7 +175,9 @@
 				function test(){
 					console.log("TEST");
 					for(var i=0;i<40;i++){
-						addFigure(0,i+100,posMap[i].x,posMap[i].y);
+						//addFigure(0,i+100,posMap[i].x,posMap[i].y);
+						addFigure(0,i+100,goalMap[i].x,goalMap[i].y);
+
 					}
 				}
 
@@ -163,7 +189,7 @@
 					var c = msg.data;
 					var count = 0;
 
-					var homeMap = {};
+
 
 					$('#playcount').text(c);
 					$('#players').empty();
@@ -228,7 +254,7 @@
 						var dice = parseInt($("#lbDice").text());
 						var pos = parseInt(msg.position);
 						console.log("MOVEFIELD TEST: "+dice+" "+msg.position);
-						moveToField(msg.figure,pos+dice);
+						moveToField(msg.figure,(pos+dice)%40);
 					}
 				});
 				socket.on('getout',function (msg){
@@ -238,7 +264,6 @@
 						//moveToField(msg.figure,msg.player*10);
 					}
 				});
-
 
 			});
 		</script>
