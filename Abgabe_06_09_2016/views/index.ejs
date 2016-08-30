@@ -228,7 +228,7 @@
 						var dice = parseInt($("#lbDice").text());
 						var pos = parseInt(msg.position);
 						console.log("MOVEFIELD TEST: "+dice+" "+msg.position);
-						moveToField(msg.figure,pos+dice);
+						moveToField(msg.figure,(pos+dice)%40);
 					}
 				});
 				socket.on('getout',function (msg){

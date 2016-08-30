@@ -30,7 +30,7 @@ for(var i=0; i<homeArray.length; i++) {
   homeArray[i] = i+1;
 }
 //
-//TESTFALL: possibleMoves[12] = 13;
+//TESTFALL: possibleMoves[38] = 13;
 //Spielfigurposition ermitteln
 app.put('/spielfigur/position',bodyParser.urlencoded({extended:true}) ,function(req, res){
   var id = req.body.id;
@@ -56,9 +56,8 @@ app.put('/spielfigur/position',bodyParser.urlencoded({extended:true}) ,function(
 
 //Wenn Figur nicht auf Spielfeld in Goal suchen
 app.get('gamefield/goal/position', function(req,res) {
-  var id = req.body.id;
   //Figuren ID ermitteln
-  var figureID = id.substring(id.length-1);
+  var figureID = String(id);
   //Alle Goalfelder durchlaufen
   for(var i = 0; i < goalArray.length; i++){
     //ID des Felds = Figuren ID -> Rückgabe
@@ -67,7 +66,7 @@ app.get('gamefield/goal/position', function(req,res) {
     }
   }
   //Figur nicht auf Spielfeld/Goal: Fehler
-  res.end("FALSE");
+  res.end("false");
 })
 
 //FigurID in Zielfeld zurückgeben
@@ -76,9 +75,11 @@ app.get('/spielzug',function(req,res){
 });
 // nicht besetzt = 0, durch sich selbst besetzt = 1, durch Gegner besetzt = 2
 app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
+
   var id = req.body.id;
   var figureID = String(id);
   var playerID = getPlayerID(figureID);
+  var used = false;
   console.log("SPIELZUG: Fig: "+figureID+ " Player: "+playerID);
   currentPosition = 0;
 
@@ -89,19 +90,75 @@ app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
       break;
     }
   }
+  //Für Spieler 1-3 neue Runde nach Ende des Spielfelds bei Feld 39
+  if(figureID>4 && currentPosition+lastDice>39){
+    console.log("Übergang! Figur: "+figureID+" Startposition: "+currentPosition+" Wurf: "+lastDice);
+    var unusedMoves;
+    unusedMoves = (lastDice+currentPosition)-40;
+    console.log("UnusedMoves: "+unusedMoves);
+    //Zielfeld besetzt?
+    for(var i=playerID*4; i<playerID*4+4; i++) {
+      if(possibleMoves[unusedMoves] == i){
+        res.end("1");
+      }
+    }
+    possibleMoves[unusedMoves] = figureID;
+    possibleMoves[currentPosition] = 0;
+    res.end("0");
+  }
+  //Überprüfen ob gewählte Spielfigur beim Zug ins Goal gehen würde
+  //Für Spieler 1-3 anders als Spieler 0, da Spieler 0 Übergang von 39 auf 0 hätte (FeldID)
+  //Hier Spieler 0:
+  if(figureID<=4 && currentPosition+lastDice>39) {
+    console.log("Für Spieler 0");
+    var unusedMoves;
+    unusedMoves = (lastDice+currentPosition)-39; //Restliche Feldzüge berechnen nachdem Goaleintrittsfeld erreicht wurde
+    //Figur in Goalarray platzieren; vorher checken ob Position besetzt
+    if((unusedMoves<=4)&&(goalArray[playerID*4+unusedMoves] == 0)){
+      console.log("0 leeres Feld!");
+      goalArray[playerID*4+unusedMoves] = figureID;
+      possibleMoves[currentPosition] = 0;
+      res.end("3");
+      return;
+      console.log("0 Ende leeres Feld");
+      used = true;
+    }
+    if(used == false){
+      console.log("0 Goal besetzt!");
+      res.end("4");
+    }
+
+  }
+  //Hier Spieler 1-3:
+  if((currentPosition<playerID*10-1) && (currentPosition+lastDice>playerID*10-1) && playerID >= 1) {
+    var unusedMoves;
+    console.log("Für Spieler 1-3");
+    unusedMoves = lastDice - ((playerID*10-1)-currentPosition); //Restliche Feldzüge berechnen nachdem Goaleintrittsfeld erreicht wurde
+    //Figur in Goalarray platzieren; vorher checken ob Position besetzt
+    if((unusedMoves<=4)&&(goalArray[playerID*4+unusedMoves] == 0)){
+      console.log("1-3 leeres Feld!");
+      goalArray[playerID*4+unusedMoves] = figureID;
+      possibleMoves[currentPosition] = 0;
+      res.end("3");
+    }
+    console.log("1-3 Goal besetzt!");
+    res.end("4");
+  }
   //Ist das Feld leer wird eine 0 zurückgegeben
-  if(possibleMoves[currentPosition+lastDice] == 0){
+  if((possibleMoves[currentPosition+lastDice] == 0) && used{
+    console.log("normaler Zug");
     possibleMoves[currentPosition+lastDice] = figureID;
     possibleMoves[currentPosition] = 0;
-
     res.end("0");
   }
   //Ist das Feld durch eine eigene Figur besetzt, wird eine 1 zurückgegeben
   for(var i=playerID*4; i<playerID*4+4; i++) {
     if(possibleMoves[currentPosition+lastDice] == i){
+      console.log("Zielfeld besetzt");
       res.end("1");
     }
   }
+
   //Ist das Feld durch einen Gegner besetzt, wird eine 2 zurückgegeben
   //possibleMoves[currentPosition+lastDice] = figureID;
   //possibleMoves[currentPosition] = 0;
@@ -219,7 +276,6 @@ app.put('/gamefield/home',bodyParser.urlencoded({extended:true}) ,function(req,r
   var id = req.body.id;
   var figureID = String(id);
   playerID = getPlayerID(figureID);
-  lastDice = 6;
   console.log(req.body);
   console.log("Spieler "+playerID+ " versucht Figur "+figureID+" aus home zu bewegen");
   //CurrentPosition an Dienstnutzer übergeben von der Figur,
@@ -247,7 +303,7 @@ app.put('/gamefield/home',bodyParser.urlencoded({extended:true}) ,function(req,r
 
 //Würfelfunktion
 function dice() {
-  lastDice = Math.round(Math.random() * (6 - 1) + 1);
+  lastDice = Math.round(Math.random() * (12 - 1) + 1);
   //lastDice = 6;
   for(var i=0;i<possibleMoves.length;i++)
     console.log(possibleMoves[i]);
