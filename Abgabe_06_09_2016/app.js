@@ -18,6 +18,8 @@ var playerCount = 0;
 var diceCount = 0;
 var currentPosition = 0;
 var playerID = 0;
+var unusedMoves = 0;
+
 
 //Spielfeld Array: 0 = frei; 1-15 FigurenID
 for(var i=0; i<possibleMoves.length; i++) {
@@ -49,14 +51,21 @@ app.put('/spielfigur/position',bodyParser.urlencoded({extended:true}) ,function(
   }
   //Figur nicht auf Spielfeld: Verweis auf Goal-Array
   console.log("ziel:"+possibleMoves[0]);
-
+  //Alle Goalfelder durchlaufen
+  for(var i = 0; i < goalArray.length; i++){
+    //ID des Felds = Figuren ID -> Rückgabe
+    if(goalArray[i] == figureID){
+      res.end("41");
+    }
+  }
   res.end("40");
   //Überprüfung ob in Goal im Dienstnutzer
 });
 
 //Wenn Figur nicht auf Spielfeld in Goal suchen
-app.get('gamefield/goal/position', function(req,res) {
+app.put('/gamefield/goal/position',bodyParser.urlencoded({extended:true}), function(req,res) {
   //Figuren ID ermitteln
+  var id = req.body.id;
   var figureID = String(id);
   //Alle Goalfelder durchlaufen
   for(var i = 0; i < goalArray.length; i++){
@@ -93,7 +102,6 @@ app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
   //Für Spieler 1-3 neue Runde nach Ende des Spielfelds bei Feld 39
   if(figureID>4 && currentPosition+lastDice>39){
     console.log("Übergang! Figur: "+figureID+" Startposition: "+currentPosition+" Wurf: "+lastDice);
-    var unusedMoves;
     unusedMoves = (lastDice+currentPosition)-40;
     console.log("UnusedMoves: "+unusedMoves);
     //Zielfeld besetzt?
@@ -111,8 +119,7 @@ app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
   //Hier Spieler 0:
   if(figureID<=4 && currentPosition+lastDice>39) {
     console.log("Für Spieler 0");
-    var unusedMoves;
-    unusedMoves = (lastDice+currentPosition)-39; //Restliche Feldzüge berechnen nachdem Goaleintrittsfeld erreicht wurde
+    unusedMoves = (lastDice+currentPosition)-40; //Restliche Feldzüge berechnen nachdem Goaleintrittsfeld erreicht wurde
     //Figur in Goalarray platzieren; vorher checken ob Position besetzt
     if((unusedMoves<=4)&&(goalArray[playerID*4+unusedMoves] == 0)){
       console.log("0 leeres Feld!");
@@ -130,11 +137,11 @@ app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
 
   }
   //Hier Spieler 1-3:
-  if((currentPosition<playerID*10-1) && (currentPosition+lastDice>playerID*10-1) && playerID >= 1) {
-    var unusedMoves;
+  if((currentPosition<=playerID*10-1) && (currentPosition+lastDice>playerID*10-1) && playerID >= 1) {
     console.log("Für Spieler 1-3");
-    unusedMoves = lastDice - ((playerID*10-1)-currentPosition); //Restliche Feldzüge berechnen nachdem Goaleintrittsfeld erreicht wurde
+    unusedMoves = lastDice - ((playerID*10-1)-currentPosition)-1; //Restliche Feldzüge berechnen nachdem Goaleintrittsfeld erreicht wurde
     //Figur in Goalarray platzieren; vorher checken ob Position besetzt
+    console.log("unusedmoves: "+unusedMoves+ " playerID: "+playerID+" goalarray: "+goalArray[playerID*4+unusedMoves]);
     if((unusedMoves<=4)&&(goalArray[playerID*4+unusedMoves] == 0)){
       console.log("1-3 leeres Feld!");
       goalArray[playerID*4+unusedMoves] = figureID;
