@@ -189,7 +189,7 @@ app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
     res.end("4");
   }
   //Ist das Feld leer wird eine 0 zurückgegeben
-  if((gamefieldArray[currentPosition+lastDice] == 0)){
+  if((gamefieldArray[(currentPosition+lastDice)%40] == 0)){
     console.log("normaler Zug");
     gamefieldArray[currentPosition+lastDice] = figureID;
     gamefieldArray[currentPosition] = 0;
