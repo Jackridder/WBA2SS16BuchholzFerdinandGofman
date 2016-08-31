@@ -142,7 +142,7 @@ app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
     unusedMoves = (lastDice+currentPosition)-40;
     console.log("UnusedMoves: "+unusedMoves);
     //Zielfeld besetzt?
-    for(var i=playerID*4; i<playerID*4+4; i++) {
+    for(var i=playerID*4+1; i<playerID*4+4; i++) {
       if(gamefieldArray[unusedMoves] == i){
         res.end("1");
       }
