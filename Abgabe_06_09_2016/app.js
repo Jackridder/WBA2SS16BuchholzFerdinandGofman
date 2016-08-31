@@ -368,7 +368,9 @@ app.put('/dice/number',bodyParser.urlencoded({extended:true}),function(req,res){
     }
   }
   //TO-DO: Die For-Schleife entfernen, das erste if auch, aus dem ersten else if ein if machen und die is durch playerID*4 rechnen
+  //TO-DO: homeCount gibt falschen Wert zurück 3 statt 2
   //Wo befinden sich die Figuren, wenn nicht in Home?
+  /*
   for(var i = playerID*4+4-1; i>playerID*4; i--){
     //Ist eine Figur draußen und das letzte Feld in goal ist nicht besetzt, darf er nur 1 Mal würfeln
     if(goalArray[i] == 0) {
@@ -386,7 +388,20 @@ app.put('/dice/number',bodyParser.urlencoded({extended:true}),function(req,res){
       console.log("Anderer Fehlermups.")
       res.end("1");
     }
-  }
+  }*/
+  console.log("Calc GoalArray: " +(((playerID+1)*4)-1));
+  console.log("HomeCount: " + homeCount);
+    if(goalArray[(playerID+1)*4-1] != 0 && goalArray[(playerID+1)*4-2] == 0 && goalArray[(playerID+1)*4-3] == 0 && goalArray[(playerID+1)*4-4] == 0 && homeCount == 3){
+          res.end("3");
+    }else if(goalArray[(playerID+1)*4-1] != 0 && goalArray[(playerID+1)*4-2] != 0 && goalArray[(playerID+1)*4-3] == 0 && goalArray[(playerID+1)*4-4] == 0 && homeCount == 2){
+          res.end("3")
+    }else if(goalArray[(playerID+1)*4-1] != 0 && goalArray[(playerID+1)*4-2] != 1 && goalArray[(playerID+1)*4-3] != 1 && goalArray[(playerID+1)*4-4] == 0 && homeCount == 1){
+          res.end("3");
+          //Ansonsten darf er nur 1 Mal würfeln
+    }else {
+      console.log("Anderer Fehlermups.")
+      res.end("1");
+    }
 });
 
 //*********************************************************************************************************************
