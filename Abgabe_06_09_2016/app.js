@@ -13,11 +13,9 @@ var possibleMoves = Array(40); // 40 Mögliche Spielfeldpositionen (ohne goal un
 var homeArray = Array(16); // Home der Spielfiguren
 var goalArray = Array(16); //Goal der Spielfiguren
 var homeCount = 0;
-var goal;
 var playerCount = 0;
 var diceCount = 0;
 var currentPosition = 0;
-var playerID = 0;
 var unusedMoves = 0;
 
 
