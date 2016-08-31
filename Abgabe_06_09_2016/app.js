@@ -92,7 +92,7 @@ app.get('/spielzug/',function(req,res){
 //*********************************************************************************************************************
 app.get('/spielzug/kickPlayer',function(req,res){
   //Position von zu kickender Figur
-  var victim = gamefieldArray[currentPosition+lastDice];
+  var victim = gamefieldArray[(currentPosition+lastDice)%40];
   console.log("Spieler " + victim + " wurde von Spieler " + gamefieldArray[currentPosition] + " gekickt")
   //Setzen Kickenden auf das Feld des Gekickten
   gamefieldArray[currentPosition+lastDice] = gamefieldArray[currentPosition];
@@ -105,6 +105,7 @@ app.get('/spielzug/kickPlayer',function(req,res){
 //*****Spieler auf Startfeld kicken************************************************************************************
 //*********************************************************************************************************************
 app.put('/spielzug/home/kickPlayer',bodyParser.urlencoded({extended:true}),function(req,res){
+  var id = req.body.id;
   var figureID = String(id);
   var playerID = getPlayerID(figureID);
 
