@@ -105,6 +105,7 @@ app.get('/spielzug/kickPlayer',function(req,res){
 //*****Spieler auf Startfeld kicken************************************************************************************
 //*********************************************************************************************************************
 app.put('/spielzug/home/kickPlayer',bodyParser.urlencoded({extended:true}),function(req,res){
+  var id = req.body.id;
   var figureID = String(id);
   var playerID = getPlayerID(figureID);
 
