@@ -35,6 +35,11 @@ for(var i=0; i<homeArray.length; i++) {
   homeArray[i] = i+1;
 }
 
+//TESTFALL:
+gamefieldArray[20] = 1;
+gamefieldArray[18] = 5;
+lastDice = 2;
+
 //*********************************************************************************************************************
 //*****Spielfigurposition ermitteln************************************************************************************
 //*********************************************************************************************************************
@@ -64,13 +69,6 @@ app.put('/spielfigur/position',bodyParser.urlencoded({extended:true}) ,function(
 });
 
 //*********************************************************************************************************************
-//*****FigurID in Zielfeld zurückgeben*********************************************************************************
-//*********************************************************************************************************************
-app.get('/spielzug',function(req,res){
-  res.end(gamefieldArray[currentPosition+lastDice].toString());
-});
-
-//*********************************************************************************************************************
 //*****Figurposition in Goal ermitteln*********************************************************************************
 //*********************************************************************************************************************
 app.put('/gamefield/goal/position',bodyParser.urlencoded({extended:true}), function(req,res) {
@@ -87,6 +85,26 @@ app.put('/gamefield/goal/position',bodyParser.urlencoded({extended:true}), funct
   //Figur nicht im Goal: Fehler
   res.end("false");
 })
+//*********************************************************************************************************************
+//*****FigurID in Zielfeld zurückgeben*********************************************************************************
+//*********************************************************************************************************************
+app.get('/spielzug/',function(req,res){
+  res.end(gamefieldArray[currentPosition+lastDice].toString());
+});
+
+//*********************************************************************************************************************
+//*****Spieler kicken**************************************************************************************************
+//*********************************************************************************************************************
+app.get('/spielzug/kickPlayer',function(req,res){
+  //Position von zu kickender Figur
+  var victim = gamefieldArray[currentPosition+lastDice];
+  console.log("Spieler " + victim + " wurde von Spieler " + gamefieldArray[currentPosition] + " gekickt")
+  //Setzen Kickenden auf das Feld des Gekickten
+  gamefieldArray[currentPosition+lastDice] = gamefieldArray[currentPosition];
+  //Alte Position auf 0 setzen
+  gamefieldArray[currentPosition] = 0;
+  res.end(victim.toString());
+});
 
 //*********************************************************************************************************************
 //*****Kompletten Spielzug durchführen*********************************************************************************
@@ -173,6 +191,7 @@ app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
   }
 
   //Ist das Feld durch einen Gegner besetzt, wird eine 2 zurückgegeben
+  homeArray[gamefieldArray[currentPosition+lastDice]-1] = gamefieldArray[currentPosition+lastDice];
   res.end("2");
 });
 
