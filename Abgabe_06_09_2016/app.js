@@ -102,6 +102,23 @@ app.get('/spielzug/kickPlayer',function(req,res){
 });
 
 //*********************************************************************************************************************
+//*****Spieler auf Startfeld kicken************************************************************************************
+//*********************************************************************************************************************
+app.put('/spielzug/home/kickPlayer',bodyParser.urlencoded({extended:true}),function(req,res){
+  var figureID = String(id);
+  var playerID = getPlayerID(figureID);
+
+  //Gegnerische Figur ermitteln
+  var victim = gamefieldArray[playerID*10];
+  //Setzen Kickenden auf das Feld des Gekickten
+  gamefieldArray[playerID*10] = figureID;
+  //Gegner zurück nach Home und eigener Spieler verlässt Home
+  homeArray[figureID-1]= 0;
+  homeArray[victim-1] = victim;
+  res.end(victim.toString());
+});
+
+//*********************************************************************************************************************
 //*****Kompletten Spielzug durchführen*********************************************************************************
 //*********************************************************************************************************************
 app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
