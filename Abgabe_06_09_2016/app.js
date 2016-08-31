@@ -145,7 +145,7 @@ app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
     if(gamefieldArray[unusedMoves] >= playerID*4+1  && gamefieldArray[unusedMoves] < playerID*4 ){
       res.end("1");
     }
-    if(gamefieldArray[unusedMoves] < playerID*4+1  && gamefieldArray[unusedMoves] >= playerID*4 && gamefieldArray[unusedMoves] != 0){
+    if((gamefieldArray[unusedMoves] < playerID*4+1  || gamefieldArray[unusedMoves] >= playerID*4) && gamefieldArray[unusedMoves] != 0){
       res.end("2");
     }
 
