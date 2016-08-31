@@ -293,7 +293,7 @@
 				});
 				socket.on('getout',function (msg){
 					console.log("GETOUT: Player: "+msg.player+" Figure: "+msg.figure);
-					if(msg.data=="true"){
+					if(msg.data==true){
 						getOutPlayer(msg.player,msg.figure);
 						//moveToField(msg.figure,msg.player*10);
 					}else{

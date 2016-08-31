@@ -65,7 +65,7 @@ io.sockets.on('connection', function(socket) {
                console.log("gamefield/home: "+fieldflag);
 
                //console.log("MOVEWISH: emit GETOUT");
-               switch(fieldflag){
+               switch(parseInt(fieldflag)){
                  case 0:
                  console.log("Startfeld frei");
                  io.emit('getout',{data:true,figure:msg.figure,player:msg.player});
@@ -81,17 +81,13 @@ io.sockets.on('connection', function(socket) {
                      console.log("MOVEWISH: kick player: "+victim);
                      io.emit('kickfigure',{data:victim});
                      io.emit('getout',{data:true,figure:msg.figure,player:msg.player});
+                     nextRound();
                    }
                  });
-                 nextRound();
+
                  break;
                }
-               if(fieldflag==1){
-               }else if(fieldflag==1){
 
-               }else{
-
-               }
              }
            });
 

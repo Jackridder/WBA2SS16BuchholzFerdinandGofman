@@ -35,11 +35,6 @@ for(var i=0; i<homeArray.length; i++) {
   homeArray[i] = i+1;
 }
 
-//TESTFALL:
-/*gamefieldArray[20] = 1;
-gamefieldArray[18] = 5;
-lastDice = 2;*/
-
 //*********************************************************************************************************************
 //*****Spielfigurposition ermitteln************************************************************************************
 //*********************************************************************************************************************
@@ -280,9 +275,8 @@ app.put('/gamefield/home',bodyParser.urlencoded({extended:true}) ,function(req,r
         //Spielfigur auf erstes Feld stellen
         gamefieldArray[playerID*10] = figureID;
         homeArray[i-1] = 0;
-        console.log("Figur "+figureID+" hat Home erfolgreich verlassen, steht auf "+gamefieldArray[playerID*10]);
-        res.end("true");
-        console.log("ENDE");
+        console.log("Figur "+figureID+" hat Home erfolgreich verlassen, steht auf "+playerID*10);
+        res.end("0");
       }else{
         console.log("Keine 6 gewürfelt oder Startfeld nicht frei: "+ gamefieldArray[i-1]);
       }
@@ -290,9 +284,43 @@ app.put('/gamefield/home',bodyParser.urlencoded({extended:true}) ,function(req,r
       console.log("Figur in falschem Home, WTF?");
     }
   }
-  console.log("Figur kann nicht aus Home gewegt werden!");
-    res.end("false");
+  if((gamefieldArray[playerID*10]>=playerID*4) && (gamefieldArray[playerID*10]>=playerID*4+4)){
+    console.log("Fehler: Eigene Figur auf Startfeld!");
+    res.end("1");
+  }
+  else{
+    console.log("Fremde Figur auf Startfeld!")
+    res.end("2");
+  }
+
+
 });
+
+//*********************************************************************************************************************
+//*****Spielzuglogik in Goal*******************************************************************************************
+//*********************************************************************************************************************
+app.put('/spielzug/goal',bodyParser.urlencoded({extended:true}) ,function(req,res){
+  var id = req.body.id;
+  var figureID = String(id);
+  playerID = getPlayerID(figureID);
+  for(var i=playerID*4; i<playerID*4+4; i++){
+    if(goalArray[i]==figureID){
+      currentPosition=goalArray[i];
+    }
+  };
+  //Überprüfung des Zugs von aktueller Position bis Zielposition
+  for(var i=currentPosition; i<currentPosition+lastDice; i++){
+    if(goalArray[i] != 0){
+      res.end("false");
+    }
+  }
+  //Bei Erfolg alte Position zurücksetzen und neue setzen
+  goalArray[currentPosition] = 0;
+  goalArray[currentPosition+lastDice] = figureID;
+  res.end("true");
+});
+
+
 
 //*********************************************************************************************************************
 //*****Spiel zurücksetzen**********************************************************************************************
