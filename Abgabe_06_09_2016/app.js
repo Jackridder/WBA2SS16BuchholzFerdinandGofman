@@ -35,11 +35,6 @@ for(var i=0; i<homeArray.length; i++) {
   homeArray[i] = i+1;
 }
 
-//TESTMUMPS:
-goalArray[3] = 1;
-goalArray[2] = 2;
-lastDice = 1;
-
 //*********************************************************************************************************************
 //*****Spielfigurposition ermitteln************************************************************************************
 //*********************************************************************************************************************
@@ -98,7 +93,7 @@ app.get('/spielzug/',function(req,res){
 app.get('/spielzug/kickPlayer',function(req,res){
   //Position von zu kickender Figur
   var victim = gamefieldArray[(currentPosition+lastDice)%40];
-  console.log("Spieler " + victim + " wurde von Spieler " + gamefieldArray[currentPosition] + " gekickt")
+  console.log("Figur " + victim + " wurde von Figur " + gamefieldArray[currentPosition] + " gekickt")
   //Setzen Kickenden auf das Feld des Gekickten
   gamefieldArray[(currentPosition+lastDice)%40] = gamefieldArray[currentPosition];
   //Alte Position auf 0 setzen
