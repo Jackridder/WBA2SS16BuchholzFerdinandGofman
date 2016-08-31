@@ -367,6 +367,7 @@ app.put('/dice/number',bodyParser.urlencoded({extended:true}),function(req,res){
       res.end("3");
     }
   }
+  homeCount-=1;
   //TO-DO: Die For-Schleife entfernen, das erste if auch, aus dem ersten else if ein if machen und die is durch playerID*4 rechnen
   //TO-DO: homeCount gibt falschen Wert zurück 3 statt 2
   //Wo befinden sich die Figuren, wenn nicht in Home?
