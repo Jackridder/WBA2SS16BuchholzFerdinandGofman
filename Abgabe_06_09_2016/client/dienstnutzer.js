@@ -2,6 +2,10 @@ var app = require('express')();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
 var request = require('request');
+
+//******************************************************************************
+//*****INITIATE*****************************************************************
+//******************************************************************************
 var allClients = [];
 var currentPlayer = 0;
 
@@ -13,6 +17,9 @@ function startGame(){
   allClients[0].emit('tokenadd',{data:currentPlayer});
 }
 
+//******************************************************************************
+//*****SOCKETIO CONNECTION LISTENER*********************************************
+//******************************************************************************
 io.on('connection',function(socket){
   console.log("IO: Socket verbunden");
 
@@ -38,8 +45,9 @@ io.sockets.on('connection', function(socket) {
   console.log("SOCKETS: new Socket");
    allClients.push(socket);
    io.emit('players',{data:allClients.length});
-   socket.on('dice',function (){
+   socket.on('dice',function (){ // Es wurde gewürfelt
      console.log("player diced.");
+     // Neue Augenzahl würfeln
      request('http://localhost:3000/dice', function (error, response, body) {
        if (!error && response.statusCode == 200) {
          console.log("dice result: "+body);
@@ -47,14 +55,16 @@ io.sockets.on('connection', function(socket) {
        }
      });
    });
-   socket.on('movewish',function(msg){
+   socket.on('movewish',function(msg){ // Spieler möchte sich bewegen
      console.log("MOVEWISH: "+msg.figure);
 
+     // Aktuelle Position der Figur finden:
      request.put('http://localhost:3000/spielfigur/position',{form:{id:msg.figure}}, function (error, response, pos) {
        if (!error && response.statusCode == 200) {
          console.log("MOVEWISH: position "+pos);
-         if(pos == 40){
+         if(pos == 40){ // Spielerfigur befindet sich im Home
            console.log("Bewegte Figur ist in home");
+           // Ist das wunschfeld frei?
            request.put('http://localhost:3000/gamefield/home',{form:{id:msg.figure}}, function (error, response, fieldflag) {
              /*
                 0 = Feld frei
@@ -73,12 +83,13 @@ io.sockets.on('connection', function(socket) {
                  break;
                  case 1:
                  console.log("Startfeld mit eigener Figur besetzt");
+                 io.emit('getout',{data:false,figure:msg.figure,player:msg.player});
                  break;
                  case 2:
                  console.log("Startfeld mit fremder Figur besetzt");
-                 request('http://localhost:3000/spielzug/kickPlayer', function (error, response, victim) {
+                 request.put('http://localhost:3000/spielzug/home/kickPlayer',{form:{id:msg.figure}}, function (error, response, victim) {
                    if (!error && response.statusCode == 200) {
-                     console.log("MOVEWISH: kick player: "+victim);
+                     console.log("MOVEWISH: kick figur: "+victim);
                      io.emit('kickfigure',{data:victim});
                      io.emit('getout',{data:true,figure:msg.figure,player:msg.player});
                      nextRound();
@@ -91,7 +102,7 @@ io.sockets.on('connection', function(socket) {
              }
            });
 
-         }else{
+         }else{ // Spielfigur befindet sich auf Feld
            request.put('http://localhost:3000/spielzug',{form:{id:msg.figure}}, function (error, response, fieldflag) {
              /*
                 0 = Feld frei
@@ -114,6 +125,7 @@ io.sockets.on('connection', function(socket) {
                        console.log("MOVEWISH: kick player: "+victim);
                        io.emit('kickfigure',{data:victim});
                        io.emit('movefield',{data:true,figure:msg.figure,position:pos});
+                       nextRound();
                      }
                    });
                   break;
@@ -177,6 +189,9 @@ io.sockets.on('connection', function(socket) {
    });
 });
 
+//******************************************************************************
+//*****EXPRESS EJS RENDERER*****************************************************
+//******************************************************************************
 app.set('view engine', 'ejs');
 app.get('/',function (req,res) {
     res.render('index');
@@ -212,6 +227,22 @@ app.get('/spielfigur/:picid',function (req,res) {
     });
 });
 
+app.get('/rules',function (req,res) {
+  res.sendFile(__dirname+'/rules/rules.html', function (err){
+     if(err) {
+          console.log(err);
+      }
+      else{
+          console.log("Datei geschickt!");
+      }
+      res.end();
+  });
+});
+
+//******************************************************************************
+//*****FUNCTIONS****************************************************************
+//******************************************************************************
+
 function newPlayer(){
   data = false;
   request.post('http://localhost:3000/spielfigur', function (error, response, body) {
@@ -239,15 +270,3 @@ function abortGame(){
     }
   });
 }
-
-app.get('/rules',function (req,res) {
-  res.sendFile(__dirname+'/rules/rules.html', function (err){
-     if(err) {
-          console.log(err);
-      }
-      else{
-          console.log("Datei geschickt!");
-      }
-      res.end();
-  });
-});

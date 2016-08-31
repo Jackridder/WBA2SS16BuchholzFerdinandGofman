@@ -240,7 +240,7 @@ app.put('/gamefield/home',bodyParser.urlencoded({extended:true}) ,function(req,r
       console.log("Figur in falschem Home, WTF?");
     }
   }
-  if((gamefieldArray[playerID*10]>=playerID*4) && (gamefieldArray[playerID*10]<playerID*4+4)){
+  if((gamefieldArray[playerID*10]>=playerID*4+1) && (gamefieldArray[playerID*10]<=playerID*4+4)){
     console.log("Fehler: Eigene Figur auf Startfeld!");
     res.end("1");
   }
