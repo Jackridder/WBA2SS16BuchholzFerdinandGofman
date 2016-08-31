@@ -190,50 +190,6 @@ app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
   res.end("2");
 });
 
-
-//*********************************************************************************************************************
-//*****Anzahl der Würfelwürfe ermitteln********************************************************************************
-//*********************************************************************************************************************
-app.put('/dice/number',bodyParser.urlencoded({extended:true}),function(req,res){
-  var id = req.body.id;
-  var figureID = String(id);
-  console.log(req.body.id);
-  for(var i=0; i<homeArray.length;i++){
-    homeArray[i]=i;
-  }
-
-  //Spieler ermitteln
-  playerID = getPlayerID(figureID);
-  homeCount = 0;
-  //Sind alle 4 Figuren in der Basis des gewählten Spielers, darf er 3 Mal würfeln
-  for(var i=playerID*4; i<playerID*4+4; i++) {
-    if(homeArray[i] >= playerID*4 && homeArray[i] <= playerID*4+3) {
-      homeCount++;
-    }
-    if(homeCount == 4) {
-      res.end("3");
-    }
-  }
-  //TO-DO: Überprüfen und die *piep* besser machen
-  //Wo befinden sich die Figuren, wenn nicht in Home?
-  for(var i = playerID*4; i<playerID*4+4; i++){
-    //Ist eine Figur draußen und das letzte Feld in goal ist nicht besetzt, darf er nur 1 Mal würfeln
-    if(goalArray[i] == 0) {
-          res.end("1");
-          //Ist eine Figur aus Home und diese befindet sich im letzten Feld von Goal darf er 3 Mal würfeln und das gleiche bei 2 und 3 Figuren
-    }else if(goalArray[i] == 1 && goalArray[i-1] == 0 && goalArray[i-2] == 0 && goalArray[i-3] == 0 && homeCount == 3){
-          res.end("3");
-    }else if(goalArray[i] == 1 && goalArray[i-1] == 1 && goalArray[i-2] == 0 && goalArray[i-3] == 0 && homeCount == 2){
-          res.end("3")
-    }else if(goalArray[i] == 1 && goalArray[i-1] == 1 && goalArray[i-2] == 1 && goalArray[i-3] == 0 && homeCount == 1){
-          res.end("3");
-          //Ansonsten darf er nur 1 Mal würfeln
-    }else {
-      res.end("1");
-    }
-  }
-});
-
 /*
 app.put('/gamefield/neutral',bodyParser.urlencoded({extended:true}),function (req,res) {
   console.log("Würfelzahl:"+lastDice);
@@ -364,6 +320,51 @@ function getPlayerID(id){
     return 3;
   }
 }
+
+//*********************************************************************************************************************
+//*****Anzahl der Würfelwürfe ermitteln********************************************************************************
+//*********************************************************************************************************************
+app.put('/dice/number',bodyParser.urlencoded({extended:true}),function(req,res){
+  var id = req.body.id;
+  var figureID = String(id);
+  console.log(req.body.id);
+  /*
+  for(var i=0; i<homeArray.length;i++){
+    homeArray[i]=i;
+  }
+  */
+  //Spieler ermitteln
+  playerID = getPlayerID(figureID);
+  homeCount = 0;
+  //Sind alle 4 Figuren in der Basis des gewählten Spielers, darf er 3 Mal würfeln
+  for(var i=playerID*4; i<playerID*4+4; i++) {
+    if(homeArray[i] >= playerID*4 && homeArray[i] <= playerID*4+3) {
+      homeCount++;
+    }
+    if(homeCount == 4) {
+      res.end("3");
+    }
+  }
+  //TO-DO: Überprüfen und die *piep* besser machen
+  //Wo befinden sich die Figuren, wenn nicht in Home?
+  for(var i = playerID*4; i<playerID*4+4; i++){
+    //Ist eine Figur draußen und das letzte Feld in goal ist nicht besetzt, darf er nur 1 Mal würfeln
+    if(goalArray[i] == 0) {
+          res.end("1");
+          //Ist eine Figur aus Home und diese befindet sich im letzten Feld von Goal darf er 3 Mal würfeln und das gleiche bei 2 und 3 Figuren
+    }else if(goalArray[i] == 1 && goalArray[i-1] == 0 && goalArray[i-2] == 0 && goalArray[i-3] == 0 && homeCount == 3){
+          res.end("3");
+    }else if(goalArray[i] == 1 && goalArray[i-1] == 1 && goalArray[i-2] == 0 && goalArray[i-3] == 0 && homeCount == 2){
+          res.end("3")
+    }else if(goalArray[i] == 1 && goalArray[i-1] == 1 && goalArray[i-2] == 1 && goalArray[i-3] == 0 && homeCount == 1){
+          res.end("3");
+          //Ansonsten darf er nur 1 Mal würfeln
+    }else {
+      res.end("1");
+    }
+  }
+});
+
 //*********************************************************************************************************************
 //*****Würfelfunktion inkl. Ausgabe************************************************************************************
 //*********************************************************************************************************************
