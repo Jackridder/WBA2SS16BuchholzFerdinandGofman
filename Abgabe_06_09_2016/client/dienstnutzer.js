@@ -8,29 +8,9 @@ var currentPlayer = 0;
 server.listen(3001);
 console.log("Dienstnutzer auf Port 3001");
 
-var optionsGET = {
-  host: 'localhost',
-  port: 3000,
-  path: 'leer',
-  method: 'GET',
-  headers: {
-    accept: 'application/json'
-  }
-}
-var optionsPOST = {
-  host: 'localhost',
-  port: 3000,
-  path: 'leer',
-  method: 'POST',
-  headers: {
-    accept: 'application/json'
-  }
-}
-
 function startGame(){
   console.log("4 Spieler verbunden. Starte spiel");
   allClients[0].emit('tokenadd',{data:currentPlayer});
-
 }
 
 io.on('connection',function(socket){
@@ -52,6 +32,7 @@ function nextRound(){
   allClients[currentPlayer].emit('tokenremove',{data:currentPlayer});
   currentPlayer = (currentPlayer+1)%allClients.length;
   allClients[currentPlayer].emit('tokenadd',{data:currentPlayer});
+  console.log("Next Round - Next Player: "+currentPlayer);
 }
 io.sockets.on('connection', function(socket) {
   console.log("SOCKETS: new Socket");
@@ -76,17 +57,16 @@ io.sockets.on('connection', function(socket) {
            console.log("Bewegte Figur ist in home");
            request.put('http://localhost:3000/gamefield/home',{form:{id:msg.figure}}, function (error, response, body) {
              if (!error && response.statusCode == 200) {
-               //console.log("MOVEWISH HOME ANSWER:"+body);
-               var canMove;
-               if(body==2){
-                 canMove = false;
-               }else{
-                 canMove = true;
+               console.log("gamefield/home: "+body);
+               if(body==false){
+                 console.log("Startfeld mit eigener Figur besetzt");
+               }else if(body==true){
+                 console.log("Startfeld mit fremder Figur besetzt oder frei");
+                 nextRound();
                }
-               canMove = true; //debug
-               console.log("MOVEWISH: emit GETOUT");
-               io.emit('getout',{data:canMove,figure:msg.figure,player:msg.player});
-               nextRound();
+               //console.log("MOVEWISH: emit GETOUT");
+               io.emit('getout',{data:body,figure:msg.figure,player:msg.player});
+
              }
            });
 
@@ -102,13 +82,21 @@ io.sockets.on('connection', function(socket) {
              if (!error && response.statusCode == 200) {
                console.log("MOVEWISH NEUTRAL ANSWER: "+fieldflag);
                switch(parseInt(fieldflag)){
-                 case 0:
-                 case 2:
-                  io.emit('movefield',{data:true,figure:msg.figure,position:pos});
-                  nextRound();
-                  console.log("MOVEWISH: emit movefield");
+                 case 0: //Feld Frei
+                   io.emit('movefield',{data:true,figure:msg.figure,position:pos});
+                   nextRound();
+                   console.log("MOVEWISH: emit movefield");
+                   break;
+                 case 2: //Fremde Figur
+                   request('http://localhost:3000/spielzug', function (error, response, body) {
+                     if (!error && response.statusCode == 200) {
+                       console.log("MOVEWISH: kick player: "+body);
+                       io.emit('kickfigure',{data:body});
+                       io.emit('movefield',{data:true,figure:msg.figure,position:pos});
+                     }
+                   });
                   break;
-                 case 3:
+                 case 3: //Goal Frei
                    console.log("Switch 3");
                    request.put('http://localhost:3000/gamefield/goal/position',{form:{id:msg.figure}}, function (error, response, goalpos) {
                      if (!error && response.statusCode == 200) {
