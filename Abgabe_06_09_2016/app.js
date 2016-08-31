@@ -35,6 +35,11 @@ for(var i=0; i<homeArray.length; i++) {
   homeArray[i] = i+1;
 }
 
+//TESTMUMPS:
+goalArray[3] = 1;
+goalArray[2] = 2;
+lastDice = 1;
+
 //*********************************************************************************************************************
 //*****Spielfigurposition ermitteln************************************************************************************
 //*********************************************************************************************************************
@@ -167,14 +172,11 @@ app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
       res.end("3");
       return;
       console.log("0 Ende leeres Feld");
-      used = true;
     }
-    if(used == false){
       console.log("0 Goal besetzt!");
       res.end("4");
     }
 
-  }
   //Hier Spieler 1-3:
   if((currentPosition<=playerID*10-1) && (currentPosition+lastDice>playerID*10-1) && playerID >= 1) {
     console.log("Für Spieler 1-3");
@@ -253,8 +255,10 @@ app.put('/gamefield/home',bodyParser.urlencoded({extended:true}) ,function(req,r
         homeArray[i-1] = 0;
         console.log("Figur "+figureID+" hat Home erfolgreich verlassen, steht auf "+playerID*10);
         res.end("0");
-      }else{
-        console.log("Keine 6 gewürfelt oder Startfeld nicht frei: "+ gamefieldArray[i-1]);
+      }
+      else if(lastDice !=6){
+        console.log("Keine 6 gewürfelt");
+        res.end("3");
       }
     }else{
       console.log("Figur in falschem Home, WTF?");
@@ -287,6 +291,7 @@ app.put('/spielzug/goal',bodyParser.urlencoded({extended:true}) ,function(req,re
   //Überprüfung des Zugs von aktueller Position bis Zielposition
   for(var i=currentPosition; i<currentPosition+lastDice; i++){
     if(goalArray[i] != 0){
+      console.log("FALSE: CurrPos: "+currentPosition+" lastDice: "+lastDice);
       res.end("false");
     }
   }
@@ -365,11 +370,12 @@ app.put('/dice/number',bodyParser.urlencoded({extended:true}),function(req,res){
       res.end("3");
     }
   }
-  //TO-DO: Überprüfen und die *piep* besser machen
+  //TO-DO: Die For-Schleife entfernen, das erste if auch, aus dem ersten else if ein if machen und die is durch playerID*4 rechnen
   //Wo befinden sich die Figuren, wenn nicht in Home?
-  for(var i = playerID*4; i<playerID*4+4; i++){
+  for(var i = playerID*4+4-1; i>playerID*4; i--){
     //Ist eine Figur draußen und das letzte Feld in goal ist nicht besetzt, darf er nur 1 Mal würfeln
     if(goalArray[i] == 0) {
+      console.log("Einen mupi gefunden");
           res.end("1");
           //Ist eine Figur aus Home und diese befindet sich im letzten Feld von Goal darf er 3 Mal würfeln und das gleiche bei 2 und 3 Figuren
     }else if(goalArray[i] == 1 && goalArray[i-1] == 0 && goalArray[i-2] == 0 && goalArray[i-3] == 0 && homeCount == 3){
@@ -380,6 +386,7 @@ app.put('/dice/number',bodyParser.urlencoded({extended:true}),function(req,res){
           res.end("3");
           //Ansonsten darf er nur 1 Mal würfeln
     }else {
+      console.log("Anderer Fehlermups.")
       res.end("1");
     }
   }
