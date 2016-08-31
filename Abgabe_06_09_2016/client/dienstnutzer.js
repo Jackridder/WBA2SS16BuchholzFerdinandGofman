@@ -77,26 +77,29 @@ io.sockets.on('connection', function(socket) {
                //console.log("MOVEWISH: emit GETOUT");
                switch(parseInt(fieldflag)){
                  case 0:
-                 console.log("Startfeld frei");
-                 io.emit('getout',{data:true,figure:msg.figure,player:msg.player});
-                 nextRound();
-                 break;
+                   console.log("Startfeld frei");
+                   io.emit('getout',{data:true,figure:msg.figure,player:msg.player});
+                   nextRound();
+                   break;
                  case 1:
-                 console.log("Startfeld mit eigener Figur besetzt");
-                 io.emit('getout',{data:false,figure:msg.figure,player:msg.player});
-                 break;
+                   console.log("Startfeld mit eigener Figur besetzt");
+                   io.emit('getout',{data:false,figure:msg.figure,player:msg.player});
+                   break;
                  case 2:
-                 console.log("Startfeld mit fremder Figur besetzt");
-                 request.put('http://localhost:3000/spielzug/home/kickPlayer',{form:{id:msg.figure}}, function (error, response, victim) {
-                   if (!error && response.statusCode == 200) {
-                     console.log("MOVEWISH: kick figur: "+victim);
-                     io.emit('kickfigure',{data:victim});
-                     io.emit('getout',{data:true,figure:msg.figure,player:msg.player});
-                     nextRound();
-                   }
-                 });
-
-                 break;
+                   console.log("Startfeld mit fremder Figur besetzt");
+                   request.put('http://localhost:3000/spielzug/home/kickPlayer',{form:{id:msg.figure}}, function (error, response, victim) {
+                     if (!error && response.statusCode == 200) {
+                       console.log("MOVEWISH: kick figur: "+victim);
+                       io.emit('kickfigure',{data:victim});
+                       io.emit('getout',{data:true,figure:msg.figure,player:msg.player});
+                       nextRound();
+                     }
+                   });
+                   break;
+                 case 3:
+                   console.log("Keine 6 gewürfelt");
+                   io.emit('getout',{data:false,figure:msg.figure,player:msg.player});
+                   break;
                }
 
              }
