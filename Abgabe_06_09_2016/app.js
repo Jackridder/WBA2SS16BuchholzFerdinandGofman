@@ -204,7 +204,7 @@ app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
   }
 
   //Ist das Feld durch einen Gegner besetzt, wird eine 2 zurückgegeben
-  homeArray[gamefieldArray[currentPosition+lastDice]-1] = gamefieldArray[currentPosition+lastDice];
+  homeArray[(gamefieldArray[currentPosition+lastDice]-1)%40] = gamefieldArray[(currentPosition+lastDice)%40];
   res.end("2");
 });
 
