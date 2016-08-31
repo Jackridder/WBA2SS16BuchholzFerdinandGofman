@@ -102,6 +102,23 @@ app.get('/spielzug/kickPlayer',function(req,res){
 });
 
 //*********************************************************************************************************************
+//*****Spieler auf Startfeld kicken************************************************************************************
+//*********************************************************************************************************************
+app.put('/spielzug/home/kickPlayer',bodyParser.urlencoded({extended:true}),function(req,res){
+  var figureID = String(id);
+  var playerID = getPlayerID(figureID);
+
+  //Gegnerische Figur ermitteln
+  var victim = gamefieldArray[playerID*10];
+  //Setzen Kickenden auf das Feld des Gekickten
+  gamefieldArray[playerID*10] = figureID;
+  //Gegner zurück nach Home und eigener Spieler verlässt Home
+  homeArray[figureID-1]= 0;
+  homeArray[victim-1] = victim;
+  res.end(victim.toString());
+});
+
+//*********************************************************************************************************************
 //*****Kompletten Spielzug durchführen*********************************************************************************
 //*********************************************************************************************************************
 app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
@@ -240,7 +257,7 @@ app.put('/gamefield/home',bodyParser.urlencoded({extended:true}) ,function(req,r
       console.log("Figur in falschem Home, WTF?");
     }
   }
-  if((gamefieldArray[playerID*10]>=playerID*4) && (gamefieldArray[playerID*10]<playerID*4+4)){
+  if((gamefieldArray[playerID*10]>=playerID*4+1) && (gamefieldArray[playerID*10]<=playerID*4+4)){
     console.log("Fehler: Eigene Figur auf Startfeld!");
     res.end("1");
   }
