@@ -142,11 +142,13 @@ app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
     unusedMoves = (lastDice+currentPosition)-40;
     console.log("UnusedMoves: "+unusedMoves);
     //Zielfeld besetzt?
-    for(var i=playerID*4; i<playerID*4+4; i++) {
-      if(gamefieldArray[unusedMoves] == i){
-        res.end("1");
-      }
+    if(gamefieldArray[unusedMoves] >= playerID*4+1  && gamefieldArray[unusedMoves] < playerID*4 ){
+      res.end("1");
     }
+    if(gamefieldArray[unusedMoves] < playerID*4+1  && gamefieldArray[unusedMoves] >= playerID*4 && gamefieldArray[unusedMoves] != 0){
+      res.end("2");
+    }
+
     gamefieldArray[unusedMoves] = figureID;
     gamefieldArray[currentPosition] = 0;
     res.end("0");
@@ -189,7 +191,7 @@ app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
     res.end("4");
   }
   //Ist das Feld leer wird eine 0 zurückgegeben
-  if((gamefieldArray[(currentPosition+lastDice)%40] == 0)){
+  if((gamefieldArray[(currentPosition+lastDice)] == 0)){
     console.log("normaler Zug");
     gamefieldArray[currentPosition+lastDice] = figureID;
     gamefieldArray[currentPosition] = 0;
@@ -204,7 +206,7 @@ app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
   }
 
   //Ist das Feld durch einen Gegner besetzt, wird eine 2 zurückgegeben
-  homeArray[(gamefieldArray[currentPosition+lastDice]-1)%40] = gamefieldArray[(currentPosition+lastDice)%40];
+  homeArray[gamefieldArray[currentPosition+lastDice]-1] = gamefieldArray[currentPosition+lastDice];
   res.end("2");
 });
 
