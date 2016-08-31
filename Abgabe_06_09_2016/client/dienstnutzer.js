@@ -55,18 +55,43 @@ io.sockets.on('connection', function(socket) {
          console.log("MOVEWISH: position "+pos);
          if(pos == 40){
            console.log("Bewegte Figur ist in home");
-           request.put('http://localhost:3000/gamefield/home',{form:{id:msg.figure}}, function (error, response, body) {
+           request.put('http://localhost:3000/gamefield/home',{form:{id:msg.figure}}, function (error, response, fieldflag) {
+             /*
+                0 = Feld frei
+                1 = Eigene Figur besetzt
+                2 = Fremde Figur besetzt
+             */
              if (!error && response.statusCode == 200) {
-               console.log("gamefield/home: "+body);
-               if(body==false){
-                 console.log("Startfeld mit eigener Figur besetzt");
-               }else if(body==true){
-                 console.log("Startfeld mit fremder Figur besetzt oder frei");
-                 nextRound();
-               }
-               //console.log("MOVEWISH: emit GETOUT");
-               io.emit('getout',{data:body,figure:msg.figure,player:msg.player});
+               console.log("gamefield/home: "+fieldflag);
 
+               //console.log("MOVEWISH: emit GETOUT");
+               switch(fieldflag){
+                 case 0:
+                 console.log("Startfeld frei");
+                 io.emit('getout',{data:true,figure:msg.figure,player:msg.player});
+                 nextRound();
+                 break;
+                 case 1:
+                 console.log("Startfeld mit eigener Figur besetzt");
+                 break;
+                 case 2:
+                 console.log("Startfeld mit fremder Figur besetzt");
+                 request('http://localhost:3000/spielzug/kickPlayer', function (error, response, victim) {
+                   if (!error && response.statusCode == 200) {
+                     console.log("MOVEWISH: kick player: "+victim);
+                     io.emit('kickfigure',{data:victim});
+                     io.emit('getout',{data:true,figure:msg.figure,player:msg.player});
+                   }
+                 });
+                 nextRound();
+                 break;
+               }
+               if(fieldflag==1){
+               }else if(fieldflag==1){
+
+               }else{
+
+               }
              }
            });
 
@@ -88,10 +113,10 @@ io.sockets.on('connection', function(socket) {
                    console.log("MOVEWISH: emit movefield");
                    break;
                  case 2: //Fremde Figur
-                   request('http://localhost:3000/spielzug', function (error, response, body) {
+                   request('http://localhost:3000/spielzug/kickPlayer', function (error, response, victim) {
                      if (!error && response.statusCode == 200) {
-                       console.log("MOVEWISH: kick player: "+body);
-                       io.emit('kickfigure',{data:body});
+                       console.log("MOVEWISH: kick player: "+victim);
+                       io.emit('kickfigure',{data:victim});
                        io.emit('movefield',{data:true,figure:msg.figure,position:pos});
                      }
                    });

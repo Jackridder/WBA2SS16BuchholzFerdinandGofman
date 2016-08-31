@@ -226,7 +226,7 @@
 								startX-=100;
 							}
 							addFigure(j,count,startX+(50*i),startY);
-							homeMap[count]= {'x':startX+(50*i),'y':startY};
+							homeMap[count+1]= {'x':startX+(50*i),'y':startY};
 							count++;
 						}
 
@@ -235,6 +235,8 @@
 					//moveToGoal(1,2);
 					//moveToField(3,3);
 					//getOutPlayer(1,5);
+					//movePlayer(5,homeMap[1].x,homeMap[1].y);
+
 			  });
 				socket.on('diced',function (msg){
 					console.log("dice result: "+msg.data);
@@ -291,11 +293,11 @@
 				});
 				socket.on('getout',function (msg){
 					console.log("GETOUT: Player: "+msg.player+" Figure: "+msg.figure);
-					if(msg.data==true){
+					if(msg.data=="true"){
 						getOutPlayer(msg.player,msg.figure);
 						//moveToField(msg.figure,msg.player*10);
 					}else{
-						console.log("getout false");
+						console.log("getout false: "+msg.data);
 						//alert("Ungültiger Spielzug");
 						$("#invalidmove").fadeIn(2000).delay(1000).fadeOut(1000);
 					}

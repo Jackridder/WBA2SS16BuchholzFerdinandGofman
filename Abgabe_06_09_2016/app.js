@@ -36,9 +36,9 @@ for(var i=0; i<homeArray.length; i++) {
 }
 
 //TESTFALL:
-gamefieldArray[20] = 1;
+/*gamefieldArray[20] = 1;
 gamefieldArray[18] = 5;
-lastDice = 2;
+lastDice = 2;*/
 
 //*********************************************************************************************************************
 //*****Spielfigurposition ermitteln************************************************************************************
@@ -282,6 +282,7 @@ app.put('/gamefield/home',bodyParser.urlencoded({extended:true}) ,function(req,r
         homeArray[i-1] = 0;
         console.log("Figur "+figureID+" hat Home erfolgreich verlassen, steht auf "+gamefieldArray[playerID*10]);
         res.end("true");
+        console.log("ENDE");
       }else{
         console.log("Keine 6 gewürfelt oder Startfeld nicht frei: "+ gamefieldArray[i-1]);
       }
