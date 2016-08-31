@@ -95,7 +95,7 @@ app.get('/spielzug/kickPlayer',function(req,res){
   var victim = gamefieldArray[(currentPosition+lastDice)%40];
   console.log("Spieler " + victim + " wurde von Spieler " + gamefieldArray[currentPosition] + " gekickt")
   //Setzen Kickenden auf das Feld des Gekickten
-  gamefieldArray[currentPosition+lastDice] = gamefieldArray[currentPosition];
+  gamefieldArray[(currentPosition+lastDice)%40] = gamefieldArray[currentPosition];
   //Alte Position auf 0 setzen
   gamefieldArray[currentPosition] = 0;
   res.end(victim.toString());
@@ -189,7 +189,7 @@ app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
     res.end("4");
   }
   //Ist das Feld leer wird eine 0 zurückgegeben
-  if((gamefieldArray[currentPosition+lastDice] == 0)){
+  if((gamefieldArray[(currentPosition+lastDice)%40] == 0)){
     console.log("normaler Zug");
     gamefieldArray[currentPosition+lastDice] = figureID;
     gamefieldArray[currentPosition] = 0;
