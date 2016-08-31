@@ -8,8 +8,9 @@ app.listen(3000,function(){
 
 app.use(jsonParser);
 
+//Anlegen globaler Variablen
 var lastDice = 0;
-var possibleMoves = Array(40); // 40 Mögliche Spielfeldpositionen (ohne goal und home)
+var gamefieldArray = Array(40); // 40 Mögliche Spielfeldpositionen (ohne goal und home)
 var homeArray = Array(16); // Home der Spielfiguren
 var goalArray = Array(16); //Goal der Spielfiguren
 var homeCount = 0;
@@ -18,49 +19,60 @@ var diceCount = 0;
 var currentPosition = 0;
 var unusedMoves = 0;
 
-
-//Spielfeld Array: 0 = frei; 1-15 FigurenID
-for(var i=0; i<possibleMoves.length; i++) {
-  possibleMoves[i] = 0;
+//*********************************************************************************************************************
+//*****Setzen der Arrays***********************************************************************************************
+//*********************************************************************************************************************
+//Spielfeld Array: 0 = frei; 1-16 FigurenID
+for(var i=0; i<gamefieldArray.length; i++) {
+  gamefieldArray[i] = 0;
 }
+//Goalarray auf leere Felder setzen
 for(var i=0; i<goalArray.length; i++) {
   goalArray[i] = 0;
 }
+//Homearray mit FigurenIDs füllen
 for(var i=0; i<homeArray.length; i++) {
   homeArray[i] = i+1;
 }
-//
-//TESTFALL: possibleMoves[38] = 13;
-//Spielfigurposition ermitteln
+
+//*********************************************************************************************************************
+//*****Spielfigurposition ermitteln************************************************************************************
+//*********************************************************************************************************************
 app.put('/spielfigur/position',bodyParser.urlencoded({extended:true}) ,function(req, res){
   var id = req.body.id;
   //Figuren ID ermitteln
   var figureID = String(id);
   console.log("POSITION Figur:"+figureID);
-  //var figureID = id.charAt(id.length-1);
   //Alle Spielfelder durchlaufen
-  for(var i = 0; i < possibleMoves.length; i++){
-    console.log("Auf Spielfeld " + i + " befindet sich die Figur" + possibleMoves[i]);
+  for(var i = 0; i < gamefieldArray.length; i++){
+    console.log("Auf Spielfeld " + i + " befindet sich die Figur" + gamefieldArray[i]);
     //ID des Felds = Figuren ID -> Rückgabe
-    if(possibleMoves[i] == figureID){
+    if(gamefieldArray[i] == figureID){
       console.log("Spieler "+figureID+" befindet sich auf "+i);
       res.end(i.toString());
     }
   }
-  //Figur nicht auf Spielfeld: Verweis auf Goal-Array
-  console.log("ziel:"+possibleMoves[0]);
-  //Alle Goalfelder durchlaufen
+  //Figur nicht auf Spielfeldern -> Alle Goalfelder durchlaufen
   for(var i = 0; i < goalArray.length; i++){
     //ID des Felds = Figuren ID -> Rückgabe
     if(goalArray[i] == figureID){
       res.end("41");
     }
   }
+  //Nicht im Spielfeld oder Goal -> Figur ist in Home
   res.end("40");
-  //Überprüfung ob in Goal im Dienstnutzer
 });
 
-//Wenn Figur nicht auf Spielfeld in Goal suchen
+//*********************************************************************************************************************
+//*****FigurID in Zielfeld zurückgeben*********************************************************************************
+//*********************************************************************************************************************
+app.get('/spielzug',function(req,res){
+  res.end(gamefieldArray[currentPosition+lastDice].toString());
+});
+
+//*********************************************************************************************************************
+//*****Figurposition in Goal ermitteln*********************************************************************************
+//*********************************************************************************************************************
 app.put('/gamefield/goal/position',bodyParser.urlencoded({extended:true}), function(req,res) {
   //Figuren ID ermitteln
   var id = req.body.id;
@@ -72,27 +84,23 @@ app.put('/gamefield/goal/position',bodyParser.urlencoded({extended:true}), funct
       res.end(i.toString());
     }
   }
-  //Figur nicht auf Spielfeld/Goal: Fehler
+  //Figur nicht im Goal: Fehler
   res.end("false");
 })
 
-//FigurID in Zielfeld zurückgeben
-app.get('/spielzug',function(req,res){
-  res.end(possibleMoves[currentPosition+lastDice].toString());
-});
-// nicht besetzt = 0, durch sich selbst besetzt = 1, durch Gegner besetzt = 2
+//*********************************************************************************************************************
+//*****Kompletten Spielzug durchführen*********************************************************************************
+//*********************************************************************************************************************
 app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
-
   var id = req.body.id;
   var figureID = String(id);
   var playerID = getPlayerID(figureID);
-  var used = false;
   console.log("SPIELZUG: Fig: "+figureID+ " Player: "+playerID);
   currentPosition = 0;
 
   //Finde aktuelle Position von Figur
-  for(var i = 0; i < possibleMoves.length; i++){
-    if(possibleMoves[i] == figureID){
+  for(var i = 0; i < gamefieldArray.length; i++){
+    if(gamefieldArray[i] == figureID){
       currentPosition = i;
       break;
     }
@@ -104,12 +112,12 @@ app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
     console.log("UnusedMoves: "+unusedMoves);
     //Zielfeld besetzt?
     for(var i=playerID*4; i<playerID*4+4; i++) {
-      if(possibleMoves[unusedMoves] == i){
+      if(gamefieldArray[unusedMoves] == i){
         res.end("1");
       }
     }
-    possibleMoves[unusedMoves] = figureID;
-    possibleMoves[currentPosition] = 0;
+    gamefieldArray[unusedMoves] = figureID;
+    gamefieldArray[currentPosition] = 0;
     res.end("0");
   }
   //Überprüfen ob gewählte Spielfigur beim Zug ins Goal gehen würde
@@ -122,7 +130,7 @@ app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
     if((unusedMoves<=4)&&(goalArray[playerID*4+unusedMoves] == 0)){
       console.log("0 leeres Feld!");
       goalArray[playerID*4+unusedMoves] = figureID;
-      possibleMoves[currentPosition] = 0;
+      gamefieldArray[currentPosition] = 0;
       res.end("3");
       return;
       console.log("0 Ende leeres Feld");
@@ -143,40 +151,35 @@ app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
     if((unusedMoves<=4)&&(goalArray[playerID*4+unusedMoves] == 0)){
       console.log("1-3 leeres Feld!");
       goalArray[playerID*4+unusedMoves] = figureID;
-      possibleMoves[currentPosition] = 0;
+      gamefieldArray[currentPosition] = 0;
       res.end("3");
     }
     console.log("1-3 Goal besetzt!");
     res.end("4");
   }
   //Ist das Feld leer wird eine 0 zurückgegeben
-  if((possibleMoves[currentPosition+lastDice] == 0)){
+  if((gamefieldArray[currentPosition+lastDice] == 0)){
     console.log("normaler Zug");
-    possibleMoves[currentPosition+lastDice] = figureID;
-    possibleMoves[currentPosition] = 0;
+    gamefieldArray[currentPosition+lastDice] = figureID;
+    gamefieldArray[currentPosition] = 0;
     res.end("0");
   }
   //Ist das Feld durch eine eigene Figur besetzt, wird eine 1 zurückgegeben
   for(var i=playerID*4; i<playerID*4+4; i++) {
-    if(possibleMoves[currentPosition+lastDice] == i){
+    if(gamefieldArray[currentPosition+lastDice] == i){
       console.log("Zielfeld besetzt");
       res.end("1");
     }
   }
 
   //Ist das Feld durch einen Gegner besetzt, wird eine 2 zurückgegeben
-  //possibleMoves[currentPosition+lastDice] = figureID;
-  //possibleMoves[currentPosition] = 0;
   res.end("2");
 });
 
-app.get('/dice',function (req,res){
-    dice();
-    console.log("Es wurde eine "+lastDice+" gewürfelt");
-    res.end(lastDice.toString());
-});
 
-//Anzahl Würfe
+//*********************************************************************************************************************
+//*****Anzahl der Würfelwürfe ermitteln********************************************************************************
+//*********************************************************************************************************************
 app.put('/dice/number',bodyParser.urlencoded({extended:true}),function(req,res){
   var id = req.body.id;
   var figureID = String(id);
@@ -197,6 +200,7 @@ app.put('/dice/number',bodyParser.urlencoded({extended:true}),function(req,res){
       res.end("3");
     }
   }
+  //TO-DO: Überprüfen und die *piep* besser machen
   //Wo befinden sich die Figuren, wenn nicht in Home?
   for(var i = playerID*4; i<playerID*4+4; i++){
     //Ist eine Figur draußen und das letzte Feld in goal ist nicht besetzt, darf er nur 1 Mal würfeln
@@ -216,154 +220,73 @@ app.put('/dice/number',bodyParser.urlencoded({extended:true}),function(req,res){
   }
 });
 
-app.get('/gamefield',function (req,res) {
-  res.sendFile(__dirname+'/gamefield/gamefield.jpg', function (err){
-     if(err) {
-          console.log(err);
-          res.status(404).end("Datei nich gefunden");
-      }
-      else{
-          console.log("Datei geschickt!");
-      }
-      res.end();
-  });
-});
-
-
+/*
 app.put('/gamefield/neutral',bodyParser.urlencoded({extended:true}),function (req,res) {
-  // else if(possibleMoves[lastDice+playerID*10] <= playerID*4 && possibleMoves[lastDice+playerID*10] >= playerID*4+3) {
-  //   //Figur von Spieler auf neue Pos bewegen
-  //   possibleMoves[lastDice+playerID*10] == figureID;
-  //   res.end((lastDice+playerID*10).toString());
-  // }
-  //TESTFALL: dice();
   console.log("Würfelzahl:"+lastDice);
   var id = req.body.id;
-
   var figureID = String(id);
   playerID = getPlayerID(figureID);
   console.log("neutral: "+id);
 
-/*
-  if (possibleMoves[lastDice+playerID*10] < playerID*4 && possibleMoves[lastDice+playerID*10] > playerID*4+3){
-     //Figur von Spieler auf neue Pos bewegen
-     possibleMoves[lastDice+playerID*10] = figureID;
-     res.end("true");
-   }
-   else if(possibleMoves[lastDice+playerID*10] >= playerID*4 && possibleMoves[lastDice+playerID*10] <= playerID*4+3){
-     possibleMoves[lastDice+playerID*10] = figureID;
-     res.end("true");
-   }
-   else{
-     res.end("false");
-   }
-*/
 //TO-DO Spielfeld von alter Position resetten
-for(var i = 0; i < possibleMoves.length; i++){
-  if(possibleMoves[i] == figureID){
+for(var i = 0; i < gamefieldArray.length; i++){
+  if(gamefieldArray[i] == figureID){
     currentPosition = i;
     console.log("CurrentPos:"+currentPosition);
-    console.log("possibleMoves:"+possibleMoves[i]);
+    console.log("gamefieldArray:"+gamefieldArray[i]);
   }
 }
 console.log("ziel:"+(lastDice*1.0+currentPosition*1.0));
-possibleMoves[lastDice+currentPosition] = figureID;
-possibleMoves[currentPosition] = 0;
+gamefieldArray[lastDice+currentPosition] = figureID;
+gamefieldArray[currentPosition] = 0;
 res.end("true");
 });
+*/
 
-app.get('/gamefield/home',function (req,res) {
-  //Basis Array: 0 = frei 1 = belegt
-  //Noch ohne Sinn
-});
-
+//*********************************************************************************************************************
+//*****Gesamte Homelogik**********************************************************************************************
+//*********************************************************************************************************************
 app.put('/gamefield/home',bodyParser.urlencoded({extended:true}) ,function(req,res){
   var id = req.body.id;
   var figureID = String(id);
   playerID = getPlayerID(figureID);
   console.log(req.body);
   console.log("Spieler "+playerID+ " versucht Figur "+figureID+" aus home zu bewegen");
-  //CurrentPosition an Dienstnutzer übergeben von der Figur,
-  //um die Figur zu bewegen
   //Server muss bei jedem Klick abfragen ob Zug möglich Ist
   for(var i=playerID*4+1; i<=playerID*4+4;i++) {
     if(homeArray[i-1] >= playerID*4+1 && homeArray[i-1] <= playerID*4+4){
       //6 Gewürfelt(kein Zug möglich)->ausgewählte FigurID aus home auf Startfeld
-      if(lastDice == 6 && possibleMoves[playerID*10] == 0) {
+      if(lastDice == 6 && gamefieldArray[playerID*10] == 0) {
+        console.log("6 Gewürfelt, Startfeld frei!");
         //Spielfigur auf erstes Feld stellen
-        possibleMoves[playerID*10] = figureID;
+        gamefieldArray[playerID*10] = figureID;
         homeArray[i-1] = 0;
-        console.log("PlayerID: "+playerID+" PlayerID*10 " + playerID*10);
-        console.log("Home erfolgreich verlassen: "+possibleMoves[playerID*10]);
+        console.log("Figur "+figureID+" hat Home erfolgreich verlassen, steht auf "+gamefieldArray[playerID*10]);
         res.end("true");
       }else{
-        console.log("FALSE: LastDice: "+lastDice+" Possiblemoves: "+ possibleMoves[playerID*10]);
+        console.log("Keine 6 gewürfelt oder Startfeld nicht frei: "+ gamefieldArray[i-1]);
       }
     }else{
-      console.log("FALSE: homeArray["+i+"] "+homeArray[i]+" PlayerID "+playerID);
+      console.log("Figur in falschem Home, WTF?");
     }
   }
+  console.log("Figur kann nicht aus Home gewegt werden!");
     res.end("false");
 });
 
-//Würfelfunktion
-function dice() {
-  lastDice = Math.round(Math.random() * (12 - 1) + 1);
-  //lastDice = 6;
-  for(var i=0;i<possibleMoves.length;i++)
-    console.log(possibleMoves[i]);
-}
-
-app.get('/gamefield/goal',function (req,res) {
-    for(i=0;i<4;i++){
-      for(j=0;j<4;j++){
-        if(goal[i][j]==0)
-          res.end(i);
-      }
-    }
-    res.end();
-});
-
+//*********************************************************************************************************************
+//*****Spiel zurücksetzen**********************************************************************************************
+//*********************************************************************************************************************
 app.delete('/spielfigur',function (req,res) {
     playerCount = 0;
-    possibleMoves = [];
+    gamefieldArray = [];
     lastDice = 0;
     res.end("true");
 });
 
-app.get('/spielfigur/:picname',function (req,res) {
-    var filename = req.params.picname;
-    res.sendFile(__dirname+'/spielfigur/'+filename, function (err){
-       if(err) {
-            console.error("SendFile error:", err, " (status: " + err.status + ")");
-            //console.log(err);
-            if (err.status) {
-              res.status(err.status).end();
-            }
-        }
-        else{
-            console.log("Datei geschickt!");
-        }
-        res.end();
-    });
-});
-
-app.get('/spielfigur',function (req,res) {
-  console.log("GET Spielfigur: "+playerCount);
-  res.end(playerCount.toString());
-});
-
-app.post('/spielfigur',jsonParser,function (req,res) {
-  console.log("Spieler "+playerCount+" verbunden");
-  if(playerCount<4){
-    playerCount++;
-    res.end("true");
-  }else{
-    res.end("false"); //spiel bereits gestartet
-  }
-
-});
-
+//*********************************************************************************************************************
+//*****Anzeige der Regeln**********************************************************************************************
+//*********************************************************************************************************************
 app.get('/rules',function (req,res) {
   res.sendFile(__dirname+'/rules/rules.html', function (err){
      if(err) {
@@ -376,6 +299,9 @@ app.get('/rules',function (req,res) {
   });
 });
 
+//*********************************************************************************************************************
+//*****PlayerID aus Übergebenen Werten berechnen***********************************************************************
+//*********************************************************************************************************************
 function getPlayerID(id){
   if(id > 0 && id <= 4){
     return 0;
@@ -390,3 +316,29 @@ function getPlayerID(id){
     return 3;
   }
 }
+//*********************************************************************************************************************
+//*****Würfelfunktion inkl. Ausgabe************************************************************************************
+//*********************************************************************************************************************
+app.get('/dice',function (req,res){
+    dice();
+    console.log("Es wurde eine "+lastDice+" gewürfelt");
+    res.end(lastDice.toString());
+});
+
+//Würfelfunktion
+function dice() {
+  lastDice = Math.round(Math.random() * (12 - 1) + 1);
+  //lastDice = 6;
+  for(var i=0;i<gamefieldArray.length;i++)
+    console.log(gamefieldArray[i]);
+}
+
+app.post('/spielfigur',jsonParser,function (req,res) {
+  console.log("Spieler "+playerCount+" verbunden");
+  if(playerCount<4){
+    playerCount++;
+    res.end("true");
+  }else{
+    res.end("false"); //spiel bereits gestartet
+  }
+});
