@@ -170,7 +170,7 @@
 							//movePlayer(this.id,posMap[20].x,posMap[20].y);
 
 						}
-						lockUI(id);
+						//lockUI(id);
 
 					});
 				}
@@ -187,6 +187,10 @@
 						addFigure(0,i+100,goalMap[i].x,goalMap[i].y);
 
 					}
+				}
+
+				function kickFigure(figureID){
+					movePlayer(figureID,homeMap[figureID].x,homeMap[figureID].y);
 				}
 
 
@@ -222,7 +226,7 @@
 								startX-=100;
 							}
 							addFigure(j,count,startX+(50*i),startY);
-							homeMap[count]= {'x':startX+(50*i),'y':startY};
+							homeMap[count+1]= {'x':startX+(50*i),'y':startY};
 							count++;
 						}
 
@@ -231,6 +235,8 @@
 					//moveToGoal(1,2);
 					//moveToField(3,3);
 					//getOutPlayer(1,5);
+					//movePlayer(5,homeMap[1].x,homeMap[1].y);
+
 			  });
 				socket.on('diced',function (msg){
 					console.log("dice result: "+msg.data);
@@ -243,7 +249,18 @@
 				});
 				socket.on('tokenadd',function (msg){
 					console.log("TOKEN: Meine Runde! Ich bin Spieler "+msg.data);
-					$("#currentPlayer").text("Ich bin an der Reihe!");
+					var currentPlayer;
+					switch(msg.data){
+						case 0: currentPlayer = "<span style='color:orange;'>Gelb</span>";
+						break;
+						case 1: currentPlayer = "<span style='color:green'>Grün</span>";
+						break;
+						case 2: currentPlayer = "<span style='color:red'>Rot</span>";
+						break;
+						case 3: currentPlayer = "<span style='color:black'>Schwarz</span>";
+						break;
+					}
+					$("#currentPlayer").html("Ich bin an der Reihe! (Spieler "+currentPlayer+" )");
 					unlockUI(msg.data);
 				});
 				socket.on('tokenremove',function (msg){
@@ -255,6 +272,10 @@
 					console.log("MOVE: Server: "+msg.data+" Figure: "+msg.figure);
 					if(msg.data==true){
 						movePlayer(msg.figure,msg.x,msg.y);
+					}else{
+						console.log("movegoal false");
+						//alert("Ungültiger Spielzug");
+						$("#invalidmove").fadeIn(2000).delay(1000).fadeOut(1000);
 					}
 				});
 				socket.on('movefield',function (msg){
@@ -264,6 +285,10 @@
 						var pos = parseInt(msg.position);
 						console.log("MOVEFIELD TEST: "+dice+" "+msg.position);
 						moveToField(msg.figure,(pos+dice)%40);
+					}else{
+						console.log("movefield false");
+						//alert("Ungültiger Spielzug");
+						$("#invalidmove").fadeIn(2000).delay(1000).fadeOut(1000);
 					}
 				});
 				socket.on('getout',function (msg){
@@ -271,6 +296,10 @@
 					if(msg.data==true){
 						getOutPlayer(msg.player,msg.figure);
 						//moveToField(msg.figure,msg.player*10);
+					}else{
+						console.log("getout false: "+msg.data);
+						//alert("Ungültiger Spielzug");
+						$("#invalidmove").fadeIn(2000).delay(1000).fadeOut(1000);
 					}
 				});
 				socket.on('movegoal',function (msg){
@@ -278,14 +307,26 @@
 					if(msg.data==true){
 						moveToGoal(msg.figure,msg.position);
 						//moveToField(msg.figure,msg.player*10);
+					}else{
+						console.log("movegoal false");
+						//alert("Ungültiger Spielzug");
+						$("#invalidmove").fadeIn(2000).delay(1000).fadeOut(1000);
 					}
 				});
-
+				socket.on('kickfigure',function (msg){
+					console.log("KICKFIGURE: Player: "+msg.data);
+					kickFigure(msg.data);
+				});
 			});
 		</script>
 		<style>
 			.player{width:30px;height:auto;}
-			#currentPlayer{color:red;font-weight:bold;}
+			#currentPlayer{color:red;font-weight:bold; animation: blinker 2s linear infinite;}
+			#invalidmove{display:none;position:absolute;top:250px;left:140px;color:white;font-weight:bold;font-size:35px;background-color:red;padding:60px 25px;}
+
+			@keyframes blinker {
+			  50% { opacity: 0.0; }
+			}
 		</style>
 	</head>
 	<body>
@@ -300,5 +341,7 @@
 		<input type="button" id="btnDice" value="Würfeln" /> <label for="btnDice" id="lbDice">0</label>
 		<br>
 		<a href="rules/" target="_blank" />Regeln</a>
+		<div id="invalidmove">Ungültiger Spielzug!</div>
+
 	</body>
 </html>
