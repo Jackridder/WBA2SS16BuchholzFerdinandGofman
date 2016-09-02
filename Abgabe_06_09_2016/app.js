@@ -243,7 +243,7 @@ app.put('/gamefield/home',bodyParser.urlencoded({extended:true}) ,function(req,r
         res.end("3");
       }
     }else{
-      console.log("Figur in falschem Home, WTF?");
+      console.log("Figur in falschem Home");
     }
   }
   if((gamefieldArray[playerID*10]>=playerID*4+1) && (gamefieldArray[playerID*10]<=playerID*4+4)){
@@ -353,7 +353,6 @@ app.put('/dice/number',bodyParser.urlencoded({extended:true}),function(req,res){
   for(var i = playerID*4+4-1; i>playerID*4; i--){
     //Ist eine Figur draußen und das letzte Feld in goal ist nicht besetzt, darf er nur 1 Mal würfeln
     if(goalArray[i] == 0) {
-      console.log("Einen mupi gefunden");
           res.end("1");
           //Ist eine Figur aus Home und diese befindet sich im letzten Feld von Goal darf er 3 Mal würfeln und das gleiche bei 2 und 3 Figuren
     }else if(goalArray[i] == 1 && goalArray[i-1] == 0 && goalArray[i-2] == 0 && goalArray[i-3] == 0 && homeCount == 3){
@@ -364,7 +363,6 @@ app.put('/dice/number',bodyParser.urlencoded({extended:true}),function(req,res){
           res.end("3");
           //Ansonsten darf er nur 1 Mal würfeln
     }else {
-      console.log("Anderer Fehlermups.")
       res.end("1");
     }
   }*/
