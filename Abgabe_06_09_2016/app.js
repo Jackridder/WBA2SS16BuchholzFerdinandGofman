@@ -376,7 +376,7 @@ app.put('/dice/number',bodyParser.urlencoded({extended:true}),function(req,res){
           res.end("3");
           //Ansonsten darf er nur 1 Mal würfeln
     }else {
-      console.log("Anderer Fehlermups.")
+      console.log("Anderer Fehler. ")
       res.end("1");
     }
 });
