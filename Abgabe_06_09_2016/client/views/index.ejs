@@ -123,6 +123,8 @@
 					console.log("Move Figure "+figure+" to X "+x+" Y "+y);
 					var figure = "#"+figure;
 					$(figure).css({"left":x,"top":y});
+					lockPlayers();
+
 				}
 				function moveToField(figureID,fieldID){
 					fieldID = parseInt(fieldID);
@@ -133,6 +135,8 @@
 
 					var figure = "#"+figureID;
 					$(figure).css({"left":x,"top":y});
+					lockPlayers();
+
 				}
 
 				function getOutPlayer(player,figure){
@@ -142,13 +146,15 @@
 					console.log("GETOUT: playerId: "+player+" X "+posMap[player*10].x+" Y "+posMap[player*10].y);
 					var figure = "#"+figure;
 					$(figure).css({"left":posMap[player*10].x,"top":posMap[player*10].y});
-
+					lockPlayers();
 				}
 
 				function moveToGoal(figure,goal){
 					console.log("MOVETOGOAL: figure: "+figure+" Goal: "+goal);
 					var figure = "#"+figure;
 					$(figure).css({"left":goalMap[goal].x,"top":goalMap[goal].y});
+					lockPlayers();
+
 					//console.log(goalMap[goal]);
 				}
 
@@ -171,9 +177,10 @@
 					$("#btnDice").attr("disabled", true);
 				}
 				function lockPlayers(){
-					console.log("LOCK: All players ");
-					for(var i = 0;i<4;i++)
+					for(var i = 0;i<4;i++){
 						$('#players').off("click","#player"+i+" img");
+						console.log("LOCK: Player"+i);
+					}
 				}
 
 				function test(){
@@ -257,7 +264,6 @@
 					if(diceAmount<1){
 						lockUI();
 					}
-					unlockPlayer(currentPlayer);
 					console.log("diceAmount: "+diceAmount);
 				});
 				socket.on('left',function (msg){
@@ -281,16 +287,7 @@
 					lockUI();
 					lockPlayers();
 				});
-				socket.on('move',function (msg){
-					console.log("MOVE: Server: "+msg.data+" Figure: "+msg.figure);
-					if(msg.data==true){
-						movePlayer(msg.figure,msg.x,msg.y);
-					}else{
-						console.log("movegoal false");
-						//alert("Ungültiger Spielzug");
-						$("#invalidmove").fadeIn(2000).delay(1000).fadeOut(1000);
-					}
-				});
+
 				socket.on('movefield',function (msg){
 					console.log("MOVEFIELD: Server: "+msg.data+" Figure: "+msg.figure+" Cur.Pos: "+msg.position);
 					if(msg.data==true){
@@ -301,7 +298,7 @@
 					}else{
 						console.log("movefield false");
 						//alert("Ungültiger Spielzug");
-						$("#invalidmove").fadeIn(2000).delay(1000).fadeOut(1000);
+						$("#invalidmove").fadeIn(1000).delay(500).fadeOut(1000);
 					}
 				});
 				socket.on('getout',function (msg){
@@ -312,7 +309,7 @@
 					}else{
 						console.log("getout false: "+msg.data);
 						//alert("Ungültiger Spielzug");
-						$("#invalidmove").fadeIn(2000).delay(1000).fadeOut(1000);
+						$("#invalidmove").fadeIn(1000).delay(500).fadeOut(1000);
 					}
 				});
 				socket.on('movegoal',function (msg){
@@ -323,7 +320,7 @@
 					}else{
 						console.log("movegoal false");
 						//alert("Ungültiger Spielzug");
-						$("#invalidmove").fadeIn(2000).delay(1000).fadeOut(1000);
+						$("#invalidmove").fadeIn(1000).delay(500).fadeOut(1000);
 					}
 				});
 				socket.on('kickfigure',function (msg){
@@ -336,6 +333,10 @@
 				socket.on('gamewon',function(msg){
 					console.log("GAME WON: "+msg.data)
 					$("#winscreen").html("Spieler "+getPlayerText(msg.data)+" hat gewonnen!").fadeIn(2000);
+				});
+				socket.on('unlockPlayer',function(msg){
+					console.log("UNLOCKPLAYER: "+msg.data)
+					unlockPlayer(msg.data);
 				});
 			});
 		</script>

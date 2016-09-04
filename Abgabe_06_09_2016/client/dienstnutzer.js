@@ -42,6 +42,7 @@ io.sockets.on('connection', function(socket) {
        if (!error && response.statusCode == 200) {
          console.log("dice result: "+body);
          io.emit('diced',{data:body});
+         allClients[currentPlayer].emit('unlockPlayer',{data:currentPlayer});
        }
      });
    });
@@ -70,7 +71,7 @@ io.sockets.on('connection', function(socket) {
                  case 0:
                    console.log("Startfeld frei");
                    io.emit('getout',{data:true,figure:msg.figure,player:msg.player});
-                   nextRound();
+                   //nextRound();
                    break;
                  case 1:
                    console.log("Startfeld mit eigener Figur besetzt");
@@ -254,7 +255,7 @@ function nextRound(){
   //allClients[currentPlayer].emit('tokenadd',{data:currentPlayer});
   request.put('http://localhost:3000/dice/number',{form:{id:currentPlayer}}, function (error, response, body) {
     if (!error && response.statusCode == 200) {
-      console.log("Anzahl der Würfe: "+body);
+      console.log("Anzahl der Würfe: "+body+" für Spieler "+currentPlayer);
       //currentPlayer = (currentPlayer+1)%allClients.length;
       allClients[currentPlayer].emit('tokenadd',{data:currentPlayer,dices:parseInt(body)});
     }

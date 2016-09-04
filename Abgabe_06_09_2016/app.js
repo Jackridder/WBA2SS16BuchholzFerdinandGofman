@@ -380,15 +380,5 @@ function resetGame() {
     homeArray[i] = i+1;
   }
 
-  homeArray[4] = 0;
-  homeArray[5] = 0;
-  homeArray[6] = 0;
-  homeArray[7] = 0;
-
-  goalArray[4] = 5;
-  goalArray[5] = 6;
-  goalArray[6] = 7;
-  goalArray[7] = 8;
-
 }
 //******************************************************************************
