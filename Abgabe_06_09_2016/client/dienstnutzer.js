@@ -8,6 +8,7 @@ var request = require('request');
 //******************************************************************************
 var allClients = [];
 var currentPlayer = 0;
+var lastDice = 0;
 
 server.listen(3001);
 console.log("Dienstnutzer auf Port 3001");
@@ -43,6 +44,7 @@ io.sockets.on('connection', function(socket) {
          console.log("dice result: "+body);
          io.emit('diced',{data:body});
          allClients[currentPlayer].emit('unlockPlayer',{data:currentPlayer});
+         lastDice = parseInt(body);
        }
      });
    });
@@ -99,7 +101,27 @@ io.sockets.on('connection', function(socket) {
              }
            });
 
-         }else{ // Spielfigur befindet sich auf Feld
+         }else if(pos == 41){ // Spielfigur befindet sich auf Feld
+           request.put('http://localhost:3000/gamefield/goal/position',{form:{id:msg.figure}}, function (error, response, goalpos) {
+             if (!error && response.statusCode == 200) {
+               request.put('http://localhost:3000/spielzug/goal',{form:{id:msg.figure}}, function (error, response, canMove) {
+                 console.log("MOVEWISH GOAL ANSWER: "+goalpos+" canMove: "+canMove);
+
+                 if(canMove==false){
+                   io.emit('movegoal',{data:false,figure:msg.figure,position:""});
+                   nextRound();
+                   console.log("MOVEWISH: Goal false");
+                 }else{
+                   io.emit('movegoal',{data:true,figure:msg.figure,position:goalpos});
+                   nextRound();
+                   console.log("MOVEWISH: Goal true");
+                 }
+               });
+             }
+          });
+
+
+         }else{
            request.put('http://localhost:3000/spielzug',{form:{id:msg.figure}}, function (error, response, fieldflag) {
              /*
                 0 = Feld frei
@@ -113,7 +135,11 @@ io.sockets.on('connection', function(socket) {
                switch(parseInt(fieldflag)){
                  case 0: //Feld Frei
                    io.emit('movefield',{data:true,figure:msg.figure,position:pos});
-                   nextRound();
+                   if(lastDice == 6){
+                     allClients[currentPlayer].emit('tokenadd',{data:currentPlayer,dices:1});
+                   }else{
+                     nextRound();
+                   }
                    console.log("MOVEWISH: emit movefield");
                    break;
                  case 2: //Fremde Figur
@@ -136,9 +162,17 @@ io.sockets.on('connection', function(socket) {
                          nextRound();
                          console.log("MOVEWISH: Goal false");
                        }else{
-                          io.emit('movegoal',{data:true,figure:msg.figure,position:goalpos});
-                          nextRound();
-                          console.log("MOVEWISH: Goal true");
+                          request.put('http://localhost:3000/spielzug/goal',{form:{id:msg.figure}}, function (error, response, canMove) {
+                            if(canMove==false){
+                              io.emit('movegoal',{data:false,figure:msg.figure,position:""});
+                              nextRound();
+                              console.log("MOVEWISH: Goal false");
+                            }else{
+                              io.emit('movegoal',{data:true,figure:msg.figure,position:goalpos});
+                              nextRound();
+                              console.log("MOVEWISH: Goal true");
+                            }
+                          });
                         }
                       }else{
                         console.log("ERROR: "+error);

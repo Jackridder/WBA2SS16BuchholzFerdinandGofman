@@ -387,7 +387,4 @@ function resetGame() {
   for(var i=0; i<homeArray.length; i++) {
     homeArray[i] = i+1;
   }
-  gamefieldArray[39] = 1;
-  homeArray[0] = 0;
-  lastDice = 1;
 }
