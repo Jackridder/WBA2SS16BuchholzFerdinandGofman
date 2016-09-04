@@ -259,26 +259,30 @@ app.put('/spielzug/gewinner',function(req,res){
 app.put('/spielzug/goal',bodyParser.urlencoded({extended:true}) ,function(req,res){
   var id = req.body.id;
   var figureID = String(id);
+  var currentGoalPosition;
   playerID = getPlayerID(figureID);
+
+  //Figur in Goal suchen und Position speichern
   for(var i=playerID*4; i<playerID*4+4; i++){
     if(goalArray[i]==figureID){
-      currentPosition=goalArray[i];
+      currentGoalPosition=i;
     }
   };
   //Überprüfung des Zugs von aktueller Position bis Zielposition
-  for(var i=currentPosition; i<currentPosition+lastDice; i++){
+  for(var i=currentGoalPosition; i<currentGoalPosition+lastDice; i++){
+    //Nicht frei: fehler
     if(goalArray[i] != 0){
-      console.log("FALSE: CurrPos: "+currentPosition+" lastDice: "+lastDice);
+      console.log("FALSE: CurrPos: "+currentGoalPosition+" lastDice: "+lastDice);
       res.end("false");
     }
   }
-  if(currentPosition+lastDice > playerID*4+3){
+  if(currentGoalPosition+lastDice > playerID*4+3){
     res.end("false");
   }
   //Bei Erfolg alte Position zurücksetzen und neue setzen
   else{
-    goalArray[currentPosition] = 0;
-    goalArray[currentPosition+lastDice] = figureID;
+    goalArray[currentGoalPosition] = 0;
+    goalArray[currentGoalPosition+lastDice] = figureID;
     res.end("true");
   }
 });
@@ -317,7 +321,7 @@ app.put('/dice/number',bodyParser.urlencoded({extended:true}),function(req,res){
           res.end("3")
     }else if(goalArray[(playerID+1)*4-1] != 0 && goalArray[(playerID+1)*4-2] != 1 && goalArray[(playerID+1)*4-3] != 1 && goalArray[(playerID+1)*4-4] == 0 && homeCount == 1){
           res.end("3");
-          //Ansonsten darf er nur 1 Mal würfeln
+    //Ansonsten darf er nur 1 Mal würfeln
     }else {
       res.end("1");
     }
@@ -332,7 +336,7 @@ app.get('/dice',function (req,res){
 
 //Würfelfunktion
 function dice() {
-  lastDice = Math.round(Math.random() * (12 - 1) + 1);
+  lastDice = Math.round(Math.random() * (6 - 1) + 1);
   //lastDice = 6;
 }
 
