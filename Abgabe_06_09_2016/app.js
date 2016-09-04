@@ -281,9 +281,6 @@ app.put('/spielzug/goal',bodyParser.urlencoded({extended:true}) ,function(req,re
       currentPosition=goalArray[i];
     }
   }
-  if(currentPosition+lastDice > playerID*4){
-    res.end("false");
-  }
   //Überprüfung des Zugs von aktueller Position bis Zielposition
   for(var i=currentPosition; i<currentPosition+lastDice; i++){
     if(goalArray[i] != 0){
@@ -291,10 +288,16 @@ app.put('/spielzug/goal',bodyParser.urlencoded({extended:true}) ,function(req,re
       res.end("false");
     }
   }
+  if(currentPosition+lastDice > playerID*4+3){
+    res.end("false");
+  }
+
   //Bei Erfolg alte Position zurücksetzen und neue setzen
-  goalArray[currentPosition] = 0;
-  goalArray[currentPosition+lastDice] = figureID;
-  res.end("true");
+  else{
+    goalArray[currentPosition] = 0;
+    goalArray[currentPosition+lastDice] = figureID;
+    res.end("true");
+  }
 });
 
 //*********************************************************************************************************************
