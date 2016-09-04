@@ -387,4 +387,13 @@ function resetGame() {
     homeArray[i] = i+1;
   }
 
+    homeArray[0] = 0;
+    homeArray[1] = 0;
+    homeArray[2] = 0;
+    homeArray[3] = 0;
+
+    gamefieldArray[30] = 1;
+    gamefieldArray[31] = 2;
+    gamefieldArray[32] = 3;
+    gamefieldArray[34] = 4;
 }
