@@ -152,10 +152,12 @@
 				}
 
 				function unlockUI(id){
-					console.log("UNLOCKING UI "+id+" ("+currentPlayer+")");
+					console.log("UNLOCK: UI "+id);
 					$("#btnDice").attr("disabled", false);
 				}
 				function unlockPlayer(id){
+					console.log("UNLOCK: Player "+id);
+					lockPlayers();
 					$('#players').on("click","#player"+id+" img",function(){
 						var dice = $("#lbDice").text();
 						fid = $(this).find("#player"+id+" img").prevObject[0].id;
@@ -164,12 +166,13 @@
 						socket.emit('movewish',{figure:fid,player:id});
 					});
 				}
-				function lockUI(id){
+				function lockUI(){
 					$("#btnDice").attr("disabled", true);
-					console.log("UI "+id+" LOCKED");
 				}
-				function lockPlayer(id){
-					$('#players').off("click","#player"+id+" img");
+				function lockPlayers(){
+					console.log("LOCK: All players ");
+					for(var i = 0;i<4;i++)
+						$('#players').off("click","#player"+i+" img");
 				}
 
 				function test(){
@@ -184,7 +187,18 @@
 				function kickFigure(figureID){
 					movePlayer(figureID,homeMap[figureID].x,homeMap[figureID].y);
 				}
-
+				function getPlayerText(id){
+					switch(id){
+						case 0: return "<span style='color:orange;'>Gelb</span>";
+						break;
+						case 1: return "<span style='color:green'>Grün</span>";
+						break;
+						case 2: return "<span style='color:red'>Rot</span>";
+						break;
+						case 3: return "<span style='color:black'>Schwarz</span>";
+						break;
+					}
+				}
 
 				//### SOCKETS ###
 				//Update player count
@@ -233,12 +247,13 @@
 				socket.on('diced',function (msg){
 					console.log("dice result: "+msg.data);
 					$("#lbDice").text(msg.data);
-					if(msg.data!=6 && diceAmount>1){
+					if(msg.data == 6){
+						diceAmount = 1;
+					}else if(diceAmount>0){
 						diceAmount--;
-					}else if(msg.data == 6){
-						diceAmount++;
-					}else{
-						lockUI(currentPlayer);
+					}
+					if(diceAmount<1){
+						lockUI();
 					}
 					unlockPlayer(currentPlayer);
 					console.log("diceAmount: "+diceAmount);
@@ -251,27 +266,18 @@
 				socket.on('tokenadd',function (msg){
 					console.log("TOKEN: Meine Runde! Ich bin Spieler "+msg.data);
 					currentPlayer = msg.data;
-					var currentPlayerText;
-					switch(msg.data){
-						case 0: currentPlayerText = "<span style='color:orange;'>Gelb</span>";
-						break;
-						case 1: currentPlayerText = "<span style='color:green'>Grün</span>";
-						break;
-						case 2: currentPlayerText = "<span style='color:red'>Rot</span>";
-						break;
-						case 3: currentPlayerText = "<span style='color:black'>Schwarz</span>";
-						break;
-					}
+					var currentPlayerText = getPlayerText(msg.data);
 					$("#currentPlayer").html("Ich bin an der Reihe! (Spieler "+currentPlayerText+" )");
 					unlockUI(msg.data);
+					lockPlayers();
 					diceAmount = msg.dices;
-					console.log("TOKEN (diceAmount): "+diceAmount);
+					console.log("DiceAmount: "+diceAmount);
 				});
 				socket.on('tokenremove',function (msg){
 					console.log("TOKEN: Runde vorbei! Ich bin Spieler "+msg.data);
 					$("#currentPlayer").text("");
-					lockUI(msg.data);
-					lockPlayer(msg.data);
+					lockUI();
+					lockPlayers();
 				});
 				socket.on('move',function (msg){
 					console.log("MOVE: Server: "+msg.data+" Figure: "+msg.figure);
@@ -325,6 +331,9 @@
 				socket.on('gamestart',function (msg){
 					$("#newGame").remove();
 				});
+				socket.on('gamewon',function(msg){
+					$("winscreen").text("Spieler "+getPlayerText(msg.data)+" hat gewonnen!").fadeIn(2000);
+				});
 			});
 		</script>
 		<style>
@@ -353,6 +362,6 @@
 		<a href="rules/" target="_blank" />Regeln</a>
 		<div id="playercount">Derzeit 0 Spieler verbunden</div>
 		<div id="invalidmove" class="msg">Ungültiger Spielzug!</div>
-		<div id="winscreen" class="msg">Spieler Gelb hat gewonnen</div>
+		<div id="winscreen" class="msg"></div>
 	</body>
 </html>

@@ -353,7 +353,7 @@ app.get('/dice',function (req,res){
 
 //Würfelfunktion
 function dice() {
-  lastDice = Math.round(Math.random() * (12 - 1) + 1);
+  lastDice = Math.round(Math.random() * (6 - 1) + 1);
   //lastDice = 6;
 }
 
@@ -407,16 +407,15 @@ function resetGame() {
   for(var i=0; i<homeArray.length; i++) {
     homeArray[i] = i+1;
   }
-  /*
+
   homeArray[0] = 0;
   homeArray[1] = 0;
   homeArray[2] = 0;
   homeArray[3] = 0;
 
-  gamefieldArray[39] = 1;
-  lastDice = 1;
+  goalArray[0] = 1;
   goalArray[2] = 2;
   goalArray[1] = 3;
   goalArray[3] = 4;
-  */
+
 }

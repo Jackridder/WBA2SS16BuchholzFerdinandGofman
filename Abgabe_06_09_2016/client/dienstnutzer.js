@@ -75,6 +75,7 @@ io.sockets.on('connection', function(socket) {
                  case 1:
                    console.log("Startfeld mit eigener Figur besetzt");
                    io.emit('getout',{data:false,figure:msg.figure,player:msg.player});
+                   //nextRound();
                    break;
                  case 2:
                    console.log("Startfeld mit fremder Figur besetzt");
@@ -90,6 +91,7 @@ io.sockets.on('connection', function(socket) {
                  case 3:
                    console.log("Keine 6 gewürfelt");
                    io.emit('getout',{data:false,figure:msg.figure,player:msg.player});
+                   nextRound();
                    break;
                }
 
@@ -130,6 +132,7 @@ io.sockets.on('connection', function(socket) {
                        console.log("goalpos: "+goalpos);
                        if(goalpos==false){
                          io.emit('movegoal',{data:false,figure:msg.figure,position:""});
+                         nextRound();
                          console.log("MOVEWISH: Goal false");
                        }else{
                           io.emit('movegoal',{data:true,figure:msg.figure,position:goalpos});
@@ -154,6 +157,15 @@ io.sockets.on('connection', function(socket) {
        }
      });
 
+     //Prüfen ob Spiel gewonnen
+     request.put('http://localhost:3000/spielzug/gewinner',{form:{id:msg.figure}}, function (error, response, goalpos) {
+        if (!error && response.statusCode == 200) {
+          if(body != "false"){
+            console.log("Wir haben einen Gewinner: "+body);
+            io.emit('gamewon',{data:body});
+          }
+        }
+     });
    });
 
    socket.on('disconnect', function() {
