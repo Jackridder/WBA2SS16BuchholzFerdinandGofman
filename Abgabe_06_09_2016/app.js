@@ -278,7 +278,7 @@ app.put('/spielzug/gewinner',function(req,res){
   else{
     res.end("0");
   }
-}
+});
 
 
 //*********************************************************************************************************************
@@ -433,7 +433,7 @@ app.get('/gamefield/reset',function (req,res){
   resetGame();
   playerCount = 0;
   lastDice = 0;
-}
+});
 
 function resetGame() {
   //Spielfeld Array: 0 = frei; 1-16 FigurenID

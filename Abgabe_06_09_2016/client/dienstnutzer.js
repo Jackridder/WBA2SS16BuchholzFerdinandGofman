@@ -12,10 +12,6 @@ var currentPlayer = 0;
 server.listen(3001);
 console.log("Dienstnutzer auf Port 3001");
 
-function startGame(){
-  console.log("4 Spieler verbunden. Starte spiel");
-  allClients[0].emit('tokenadd',{data:currentPlayer});
-}
 
 //******************************************************************************
 //*****SOCKETIO CONNECTION LISTENER*********************************************
@@ -23,10 +19,9 @@ function startGame(){
 io.on('connection',function(socket){
   console.log("IO: Socket verbunden");
 
-  socket.on('join',function(){
-    console.log("Player joined");
-    newPlayer();
-    if(allClients.length==4)
+  socket.on('start',function(){
+    console.log("Player started game");
+    if(allClients.length>=2)
       startGame();
   });
 
@@ -35,12 +30,7 @@ io.on('connection',function(socket){
     abortGame();
   });
 });
-function nextRound(){
-  allClients[currentPlayer].emit('tokenremove',{data:currentPlayer});
-  currentPlayer = (currentPlayer+1)%allClients.length;
-  allClients[currentPlayer].emit('tokenadd',{data:currentPlayer});
-  console.log("Next Round - Next Player: "+currentPlayer);
-}
+
 io.sockets.on('connection', function(socket) {
   console.log("SOCKETS: new Socket");
    allClients.push(socket);
@@ -70,6 +60,7 @@ io.sockets.on('connection', function(socket) {
                 0 = Feld frei
                 1 = Eigene Figur besetzt
                 2 = Fremde Figur besetzt
+                3 = Keine 6
              */
              if (!error && response.statusCode == 200) {
                console.log("gamefield/home: "+fieldflag);
@@ -125,7 +116,7 @@ io.sockets.on('connection', function(socket) {
                  case 2: //Fremde Figur
                    request('http://localhost:3000/spielzug/kickPlayer', function (error, response, victim) {
                      if (!error && response.statusCode == 200) {
-                       console.log("MOVEWISH: kick player: "+victim);
+                       console.log("MOVEWISH: kick figure: "+victim);
                        io.emit('kickfigure',{data:victim});
                        io.emit('movefield',{data:true,figure:msg.figure,position:pos});
                        nextRound();
@@ -165,21 +156,6 @@ io.sockets.on('connection', function(socket) {
 
    });
 
-
-   socket.on('moved',function(msg){
-     console.log("Player "+msg.data+" moved to X"+msg.x+" Y"+msg.y);
-     //io.emit('move',{data:true,player:msg.data,x:msg.x,y:msg.y})
-     allClients[currentPlayer].emit('tokenremove',{data:currentPlayer});
-     //Wie oft darf gewürfelt werden
-     request.put('http://localhost:3000/dice/number',{form:{id:msg.data.charAt(msg.data.length)}}, function (error, response, body) {
-       if (!error && response.statusCode == 200) {
-         console.log("PUT:"+body);
-         currentPlayer = (currentPlayer+1)%allClients.length;
-         allClients[currentPlayer].emit('tokenadd',{data:currentPlayer});
-       }
-     });
-
-   })
    socket.on('disconnect', function() {
       console.log('Player left');
       socket.emit('left',{data:allClients.length});
@@ -246,30 +222,30 @@ app.get('/rules',function (req,res) {
 //*****FUNCTIONS****************************************************************
 //******************************************************************************
 
-function newPlayer(){
-  data = false;
-  request.post('http://localhost:3000/spielfigur', function (error, response, body) {
-    if (!error && response.statusCode == 200) {
-      console.log(body);
-      data = body;
-    }
-  });
-  return data;
-}
-
-function getPlayerCount(){
-  request('http://localhost:3000/spielfigur', function (error, response, body) {
-    if (!error && response.statusCode == 200) {
-      io.emit("players",{c:body});
-      players = body;
-    }
-  });
-}
-
 function abortGame(){
-  request.delete('http://localhost:3000/spielfigur', function (error, response, body) {
+  request.delete('http://localhost:3000/gamefield/reset', function (error, response, body) {
     if (!error && response.statusCode == 200) {
       console.log("Game aborted");
     }
   });
+}
+
+function startGame(){
+  console.log(allClients.length+" Spieler verbunden. Starte spiel");
+  allClients[0].emit('tokenadd',{data:currentPlayer,dices:3});
+  io.emit('gamestart',{data:allClients.length});
+}
+
+function nextRound(){
+  allClients[currentPlayer].emit('tokenremove',{data:currentPlayer});
+  currentPlayer = (currentPlayer+1)%allClients.length;
+  //allClients[currentPlayer].emit('tokenadd',{data:currentPlayer});
+  request.put('http://localhost:3000/dice/number',{form:{id:currentPlayer}}, function (error, response, body) {
+    if (!error && response.statusCode == 200) {
+      console.log("Anzahl der Würfe: "+body);
+      //currentPlayer = (currentPlayer+1)%allClients.length;
+      allClients[currentPlayer].emit('tokenadd',{data:currentPlayer,dices:parseInt(body)});
+    }
+  });
+  console.log("Next Round - Next Player: "+currentPlayer);
 }
