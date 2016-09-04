@@ -117,6 +117,7 @@ app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
 
   //Finde aktuelle Position von Figur
   for(var i = 0; i < gamefieldArray.length; i++){
+    console.log("Feld: " + i + " ist besetzt durch " + gamefieldArray[i]);
     if(gamefieldArray[i] == figureID){
       currentPosition = i;
       break;
@@ -192,6 +193,10 @@ app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
 
   //Ist das Feld durch einen Gegner besetzt, wird eine 2 zurückgegeben
   homeArray[gamefieldArray[currentPosition+lastDice]-1] = gamefieldArray[currentPosition+lastDice];
+
+  for(var i = 0; i < gamefieldArray.length; i++){
+    console.log("Feld: " + i + " ist besetzt durch " + gamefieldArray[i]);
+  }
   res.end("2");
 });
 
@@ -236,7 +241,7 @@ app.put('/gamefield/home',bodyParser.urlencoded({extended:true}) ,function(req,r
         //Spielfigur auf erstes Feld stellen
         gamefieldArray[playerID*10] = figureID;
         homeArray[i-1] = 0;
-        console.log("Figur "+figureID+" hat Home erfolgreich verlassen, steht auf "+playerID*10 + " HomeArray: "+ i-1 +" wurde auf 0 gesetzt");
+        console.log("Figur "+figureID+" hat Home erfolgreich verlassen, steht auf "+playerID*10);
         res.end("0");
       }
       else if(lastDice !=6){
@@ -331,7 +336,6 @@ app.get('/rules',function (req,res) {
 app.put('/dice/number',bodyParser.urlencoded({extended:true}),function(req,res){
   var id = req.body.id;
   var figureID = String(id);
-  console.log(req.body.id);
   /*
   for(var i=0; i<homeArray.length;i++){
     homeArray[i]=i;
@@ -380,7 +384,6 @@ app.put('/dice/number',bodyParser.urlencoded({extended:true}),function(req,res){
           res.end("3");
           //Ansonsten darf er nur 1 Mal würfeln
     }else {
-      console.log("Anderer Fehler. ")
       res.end("1");
     }
 });
@@ -398,8 +401,9 @@ app.get('/dice',function (req,res){
 function dice() {
   lastDice = Math.round(Math.random() * (12 - 1) + 1);
   //lastDice = 6;
-  for(var i=0;i<gamefieldArray.length;i++)
+  /*for(var i=0;i<gamefieldArray.length;i++)
     console.log(gamefieldArray[i]);
+    */
 }
 
 app.post('/spielfigur',jsonParser,function (req,res) {
