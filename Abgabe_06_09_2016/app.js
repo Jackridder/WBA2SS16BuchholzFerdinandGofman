@@ -136,6 +136,7 @@ app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
     }
     if((gamefieldArray[unusedMoves] < playerID*4+1  || gamefieldArray[unusedMoves] >= playerID*4) && gamefieldArray[unusedMoves] != 0){
       res.end("2");
+      console.log("Zielfeld besetzt von Figur: "+gamefieldArray[(currentPosition+lastDice)%40]+" Startfeld von " +gamefieldArray[currentPosition]);
     }
 
     gamefieldArray[unusedMoves] = figureID;
@@ -193,7 +194,13 @@ app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
 
   //Ist das Feld durch einen Gegner besetzt, wird eine 2 zurückgegeben
   homeArray[gamefieldArray[currentPosition+lastDice]-1] = gamefieldArray[currentPosition+lastDice];
+<<<<<<< HEAD
 
+=======
+  for(var i = 0; i < gamefieldArray.length; i++){
+    console.log("Feld: " + i + " ist besetzt durch " + gamefieldArray[i]);
+  }
+>>>>>>> origin/master
   res.end("2");
 });
 
@@ -309,12 +316,16 @@ app.get('/rules',function (req,res) {
 //*********************************************************************************************************************
 app.put('/dice/number',bodyParser.urlencoded({extended:true}),function(req,res){
   var id = req.body.id;
+<<<<<<< HEAD
   var playerID = id;
   /*
   for(var i=0; i<homeArray.length;i++){
     homeArray[i]=i;
   }
   */
+=======
+  var figureID = String(id);
+>>>>>>> origin/master
   //Spieler ermitteln
   homeCount = 0;
   //Sind alle 4 Figuren in der Basis des gewählten Spielers, darf er 3 Mal würfeln
@@ -355,9 +366,6 @@ app.get('/dice',function (req,res){
 function dice() {
   lastDice = Math.round(Math.random() * (12 - 1) + 1);
   //lastDice = 6;
-  /*for(var i=0;i<gamefieldArray.length;i++)
-    console.log(gamefieldArray[i]);
-    */
 }
 
 app.post('/spielfigur',jsonParser,function (req,res) {
@@ -391,7 +399,7 @@ function getPlayerID(id){
 //*********************************************************************************************************************
 //*****Zurücksetzen des Spiels*****************************************************************************************
 //*********************************************************************************************************************
-app.get('/gamefield/reset',function (req,res){
+app.delete('/gamefield/reset',function (req,res){
   resetGame();
   playerCount = 0;
   lastDice = 0;
