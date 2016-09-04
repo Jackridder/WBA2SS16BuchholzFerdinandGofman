@@ -46,8 +46,8 @@ app.put('/spielfigur/position',bodyParser.urlencoded({extended:true}) ,function(
   //Nicht im Spielfeld oder Goal -> Figur ist in Home
   res.end("40");
 });
-//******************************************************************************
-//***************************************Figurposition in Goal ermitteln**************************************
+// //******************************************************************************
+// //***************************************Figurposition in Goal ermitteln**************************************
 app.put('/gamefield/goal/position',bodyParser.urlencoded({extended:true}), function(req,res) {
   //Figuren ID ermitteln
   var id = req.body.id;
@@ -151,6 +151,7 @@ app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
       console.log("0 Ende leeres Feld");
     }
       console.log("0 Goal besetzt!");
+      console.log("Inhalt des Zieldfeldes: "+goalArray[playerID*4+unusedMoves]);
       res.end("4");
     }
 
@@ -386,4 +387,7 @@ function resetGame() {
   for(var i=0; i<homeArray.length; i++) {
     homeArray[i] = i+1;
   }
+  gamefieldArray[39] = 1;
+  homeArray[0] = 0;
+  lastDice = 1;
 }
