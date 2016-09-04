@@ -136,6 +136,7 @@ app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
     }
     if((gamefieldArray[unusedMoves] < playerID*4+1  || gamefieldArray[unusedMoves] >= playerID*4) && gamefieldArray[unusedMoves] != 0){
       res.end("2");
+      console.log("Zielfeld besetzt von Figur: "+gamefieldArray[(currentPosition+lastDice)%40]+" Startfeld von " +gamefieldArray[currentPosition]);
     }
 
     gamefieldArray[unusedMoves] = figureID;
@@ -193,35 +194,11 @@ app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
 
   //Ist das Feld durch einen Gegner besetzt, wird eine 2 zurückgegeben
   homeArray[gamefieldArray[currentPosition+lastDice]-1] = gamefieldArray[currentPosition+lastDice];
-
   for(var i = 0; i < gamefieldArray.length; i++){
     console.log("Feld: " + i + " ist besetzt durch " + gamefieldArray[i]);
   }
   res.end("2");
 });
-
-/*
-app.put('/gamefield/neutral',bodyParser.urlencoded({extended:true}),function (req,res) {
-  console.log("Würfelzahl:"+lastDice);
-  var id = req.body.id;
-  var figureID = String(id);
-  playerID = getPlayerID(figureID);
-  console.log("neutral: "+id);
-
-//TO-DO Spielfeld von alter Position resetten
-for(var i = 0; i < gamefieldArray.length; i++){
-  if(gamefieldArray[i] == figureID){
-    currentPosition = i;
-    console.log("CurrentPos:"+currentPosition);
-    console.log("gamefieldArray:"+gamefieldArray[i]);
-  }
-}
-console.log("ziel:"+(lastDice*1.0+currentPosition*1.0));
-gamefieldArray[lastDice+currentPosition] = figureID;
-gamefieldArray[currentPosition] = 0;
-res.end("true");
-});
-*/
 
 //*********************************************************************************************************************
 //*****Gesamte Homelogik**********************************************************************************************
@@ -336,11 +313,6 @@ app.get('/rules',function (req,res) {
 app.put('/dice/number',bodyParser.urlencoded({extended:true}),function(req,res){
   var id = req.body.id;
   var figureID = String(id);
-  /*
-  for(var i=0; i<homeArray.length;i++){
-    homeArray[i]=i;
-  }
-  */
   //Spieler ermitteln
   playerID = getPlayerID(figureID);
   homeCount = 0;
@@ -353,28 +325,6 @@ app.put('/dice/number',bodyParser.urlencoded({extended:true}),function(req,res){
       res.end("3");
     }
   }
-
-  //for(var i=playerID*4+1; i<=playerID*4+4;i++) {
-  //TO-DO: Die For-Schleife entfernen, das erste if auch, aus dem ersten else if ein if machen und die is durch playerID*4 rechnen
-  //TO-DO: homeCount gibt falschen Wert zurück 3 statt 2
-  //Wo befinden sich die Figuren, wenn nicht in Home?
-  /*
-  for(var i = playerID*4+4-1; i>playerID*4; i--){
-    //Ist eine Figur draußen und das letzte Feld in goal ist nicht besetzt, darf er nur 1 Mal würfeln
-    if(goalArray[i] == 0) {
-          res.end("1");
-          //Ist eine Figur aus Home und diese befindet sich im letzten Feld von Goal darf er 3 Mal würfeln und das gleiche bei 2 und 3 Figuren
-    }else if(goalArray[i] == 1 && goalArray[i-1] == 0 && goalArray[i-2] == 0 && goalArray[i-3] == 0 && homeCount == 3){
-          res.end("3");
-    }else if(goalArray[i] == 1 && goalArray[i-1] == 1 && goalArray[i-2] == 0 && goalArray[i-3] == 0 && homeCount == 2){
-          res.end("3")
-    }else if(goalArray[i] == 1 && goalArray[i-1] == 1 && goalArray[i-2] == 1 && goalArray[i-3] == 0 && homeCount == 1){
-          res.end("3");
-          //Ansonsten darf er nur 1 Mal würfeln
-    }else {
-      res.end("1");
-    }
-  }*/
   console.log("Wie viele Figuren hat Spieler " + playerID + " in seinem Haus? Anzahl: " + homeCount);
     if(goalArray[(playerID+1)*4-1] != 0 && goalArray[(playerID+1)*4-2] == 0 && goalArray[(playerID+1)*4-3] == 0 && goalArray[(playerID+1)*4-4] == 0 && homeCount == 3){
           res.end("3");
@@ -401,9 +351,6 @@ app.get('/dice',function (req,res){
 function dice() {
   lastDice = Math.round(Math.random() * (12 - 1) + 1);
   //lastDice = 6;
-  /*for(var i=0;i<gamefieldArray.length;i++)
-    console.log(gamefieldArray[i]);
-    */
 }
 
 app.post('/spielfigur',jsonParser,function (req,res) {
@@ -437,7 +384,7 @@ function getPlayerID(id){
 //*********************************************************************************************************************
 //*****Zurücksetzen des Spiels*****************************************************************************************
 //*********************************************************************************************************************
-app.get('/gamefield/reset',function (req,res){
+app.delete('/gamefield/reset',function (req,res){
   resetGame();
   playerCount = 0;
   lastDice = 0;
