@@ -134,14 +134,18 @@ app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
       res.end("1");
 
     }
-    if((gamefieldArray[unusedMoves] < playerID*4+1  || gamefieldArray[unusedMoves] >= playerID*4) && gamefieldArray[unusedMoves] != 0){
+    else if((gamefieldArray[unusedMoves] < playerID*4+1  || gamefieldArray[unusedMoves] >= playerID*4) && gamefieldArray[unusedMoves] != 0){
       res.end("2");
       console.log("Zielfeld besetzt von Figur: "+gamefieldArray[(currentPosition+lastDice)%40]+" Startfeld von " +gamefieldArray[currentPosition]);
     }
 
-    gamefieldArray[unusedMoves] = figureID;
-    gamefieldArray[currentPosition] = 0;
-    res.end("0");
+    else{
+      gamefieldArray[unusedMoves] = figureID;
+      gamefieldArray[currentPosition] = 0;
+      res.end("0");
+
+    }
+
   }
   //Überprüfen ob gewählte Spielfigur beim Zug ins Goal gehen würde
   //Für Spieler 1-3 anders als Spieler 0, da Spieler 0 Übergang von 39 auf 0 hätte (FeldID)
@@ -180,6 +184,7 @@ app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
   //Ist das Feld leer wird eine 0 zurückgegeben
   if((gamefieldArray[(currentPosition+lastDice)] == 0)){
     console.log("normaler Zug");
+    console.log("Setze2");
     gamefieldArray[currentPosition+lastDice] = figureID;
     gamefieldArray[currentPosition] = 0;
     res.end("0");
@@ -275,7 +280,10 @@ app.put('/spielzug/goal',bodyParser.urlencoded({extended:true}) ,function(req,re
     if(goalArray[i]==figureID){
       currentPosition=goalArray[i];
     }
-  };
+  }
+  if(currentPosition+lastDice > playerID*4){
+    res.end("false");
+  }
   //Überprüfung des Zugs von aktueller Position bis Zielposition
   for(var i=currentPosition; i<currentPosition+lastDice; i++){
     if(goalArray[i] != 0){
@@ -346,14 +354,14 @@ app.get('/dice',function (req,res){
     dice();
     console.log("Es wurde eine "+lastDice+" gewürfelt");
     res.end(lastDice.toString());
-    for(var i = 0; i < 16; i++){
-      console.log("Goal: " + i + " ist besetzt durch " + goalArray[i]);
+    for(var i = 0; i < 40; i++){
+      console.log("Field: " + i + " ist besetzt durch " + gamefieldArray[i]);
     }
 });
 
 //Würfelfunktion
 function dice() {
-  lastDice = Math.round(Math.random() * (12 - 1) + 1);
+  lastDice = Math.round(Math.random() * (6 - 1) + 1);
   //lastDice = 6;
 }
 
@@ -407,16 +415,12 @@ function resetGame() {
   for(var i=0; i<homeArray.length; i++) {
     homeArray[i] = i+1;
   }
-  /*
-  homeArray[0] = 0;
-  homeArray[1] = 0;
-  homeArray[2] = 0;
-  homeArray[3] = 0;
 
-  gamefieldArray[39] = 1;
+  /* TESTFALL:
+  homeArray[0] = 0;
+  gamefieldArray[0] = 1;
+
+  gamefieldArray[39] = 13;
   lastDice = 1;
-  goalArray[2] = 2;
-  goalArray[1] = 3;
-  goalArray[3] = 4;
   */
 }
