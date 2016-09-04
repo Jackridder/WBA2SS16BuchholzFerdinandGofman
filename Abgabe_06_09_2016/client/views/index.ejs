@@ -188,6 +188,7 @@
 					movePlayer(figureID,homeMap[figureID].x,homeMap[figureID].y);
 				}
 				function getPlayerText(id){
+					console.log("GetPlayerText: "+id);
 					switch(id){
 						case 0: return "<span style='color:orange;'>Gelb</span>";
 						break;
@@ -332,7 +333,8 @@
 					$("#newGame").remove();
 				});
 				socket.on('gamewon',function(msg){
-					$("winscreen").text("Spieler "+getPlayerText(msg.data)+" hat gewonnen!").fadeIn(2000);
+					console.log("GAME WON: "+msg.data)
+					$("#winscreen").html("Spieler "+getPlayerText(msg.data)+" hat gewonnen!").fadeIn(2000);
 				});
 			});
 		</script>
@@ -341,7 +343,7 @@
 			.msg{display:none;position:absolute;top:250px;left:140px;font-weight:bold;font-size:35px;padding:60px 25px;}
 			#currentPlayer{position:absolute;color:red;font-weight:bold; animation: blinker 2s linear infinite;}
 			#invalidmove{color:white;background-color:red;}
-			#winscreen{color:white;background-color:green;width:50%;left:50px;}
+			#winscreen{color:white;background-color:black;border:3px black solid;width:520px;left:20px;}
 
 			@keyframes blinker {
 			  50% { opacity: 0.0;}
@@ -357,11 +359,11 @@
 		<input type="button" id="newGame" value="Spiel starten" />
 
 		<br>
-		<input type="button" id="btnDice" value="Würfeln" /> <label for="btnDice" id="lbDice">0</label>
+		<input type="button" id="btnDice" value="Würfeln" disabled/> <label for="btnDice" id="lbDice">0</label>
 		<br>
 		<a href="rules/" target="_blank" />Regeln</a>
 		<div id="playercount">Derzeit 0 Spieler verbunden</div>
 		<div id="invalidmove" class="msg">Ungültiger Spielzug!</div>
-		<div id="winscreen" class="msg"></div>
+		<div id="winscreen" class="msg">Spieler Schwarz hat gewonnen!</div>
 	</body>
 </html>

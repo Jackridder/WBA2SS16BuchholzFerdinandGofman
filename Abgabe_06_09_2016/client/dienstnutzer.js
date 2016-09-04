@@ -158,11 +158,11 @@ io.sockets.on('connection', function(socket) {
      });
 
      //Prüfen ob Spiel gewonnen
-     request.put('http://localhost:3000/spielzug/gewinner',{form:{id:msg.figure}}, function (error, response, goalpos) {
+     request.put('http://localhost:3000/spielzug/gewinner',{form:{id:msg.figure}}, function (error, response, body) {
         if (!error && response.statusCode == 200) {
           if(body != "false"){
             console.log("Wir haben einen Gewinner: "+body);
-            io.emit('gamewon',{data:body});
+            io.emit('gamewon',{data:parseInt(body)});
           }
         }
      });
