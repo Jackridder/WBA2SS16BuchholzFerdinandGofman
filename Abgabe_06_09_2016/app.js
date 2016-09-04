@@ -61,7 +61,7 @@ app.put('/gamefield/goal/position',bodyParser.urlencoded({extended:true}), funct
   }
   //Figur nicht im Goal: Fehler
   res.end("false");
-})
+});
 //******************************************************************************
 //**************************************FigurID in Zielfeld zurückgeben***************************************
 app.get('/spielzug/',function(req,res){
@@ -125,14 +125,15 @@ app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
       res.end("1");
 
     }
-    if((gamefieldArray[unusedMoves] < playerID*4+1  || gamefieldArray[unusedMoves] >= playerID*4) && gamefieldArray[unusedMoves] != 0){
+    else if((gamefieldArray[unusedMoves] < playerID*4+1  || gamefieldArray[unusedMoves] >= playerID*4) && gamefieldArray[unusedMoves] != 0){
       res.end("2");
       console.log("Zielfeld besetzt von Figur: "+gamefieldArray[(currentPosition+lastDice)%40]+" Startfeld von " +gamefieldArray[currentPosition]);
     }
-
-    gamefieldArray[unusedMoves] = figureID;
-    gamefieldArray[currentPosition] = 0;
-    res.end("0");
+    else{
+      gamefieldArray[unusedMoves] = figureID;
+      gamefieldArray[currentPosition] = 0;
+      res.end("0");
+    }
   }
   //Überprüfen ob gewählte Spielfigur beim Zug ins Goal gehen würde
   //Für Spieler 1-3 anders als Spieler 0, da Spieler 0 Übergang von 39 auf 0 hätte (FeldID)
@@ -188,7 +189,7 @@ app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
   for(var i = 0; i < gamefieldArray.length; i++){
     console.log("Feld: " + i + " ist besetzt durch " + gamefieldArray[i]);
   }
-  res.end("Flasche2");
+  res.end("2");
 });
 //******************************************************************************
 //********************************************Gesamte Homelogik***********************************************
@@ -234,12 +235,12 @@ app.put('/gamefield/home',bodyParser.urlencoded({extended:true}) ,function(req,r
 });
 //******************************************************************************
 //*******************************************Ermitteln des Gewinners******************************************
-app.put('/spielzug/gewinner',bodyParser.urlencoded({extended:true}),function(req,res){
+app.put('/spielzug/gewinner',function(req,res){
   var id = req.body.id;
   var figureID = String(id);
   var winner = true;
   playerID = getPlayerID(figureID);
-  console.log("/spielzug/gewinner playerid: "+playerID+ " figId: "+figureID);
+
   for(var i=playerID*4; i<playerID*4+4; i++){
     if(goalArray[i] == 0){
       winner = false;
@@ -247,7 +248,6 @@ app.put('/spielzug/gewinner',bodyParser.urlencoded({extended:true}),function(req
   }
   //Alle Figuren in Goal -> Übergebener Player ist gewinner
   if(winner) {
-    console.log("/spielzug/gewinner winner: "+winner);
     res.end(playerID.toString());
   }
   else{
@@ -259,23 +259,32 @@ app.put('/spielzug/gewinner',bodyParser.urlencoded({extended:true}),function(req
 app.put('/spielzug/goal',bodyParser.urlencoded({extended:true}) ,function(req,res){
   var id = req.body.id;
   var figureID = String(id);
+  var currentGoalPosition;
   playerID = getPlayerID(figureID);
+
+  //Figur in Goal suchen und Position speichern
   for(var i=playerID*4; i<playerID*4+4; i++){
     if(goalArray[i]==figureID){
-      currentPosition=goalArray[i];
+      currentGoalPosition=i;
     }
   };
   //Überprüfung des Zugs von aktueller Position bis Zielposition
-  for(var i=currentPosition; i<currentPosition+lastDice; i++){
+  for(var i=currentGoalPosition; i<currentGoalPosition+lastDice; i++){
+    //Nicht frei: fehler
     if(goalArray[i] != 0){
-      console.log("FALSE: CurrPos: "+currentPosition+" lastDice: "+lastDice);
+      console.log("FALSE: CurrPos: "+currentGoalPosition+" lastDice: "+lastDice);
       res.end("false");
     }
   }
+  if(currentGoalPosition+lastDice > playerID*4+3){
+    res.end("false");
+  }
   //Bei Erfolg alte Position zurücksetzen und neue setzen
-  goalArray[currentPosition] = 0;
-  goalArray[currentPosition+lastDice] = figureID;
-  res.end("true");
+  else{
+    goalArray[currentGoalPosition] = 0;
+    goalArray[currentGoalPosition+lastDice] = figureID;
+    res.end("true");
+  }
 });
 //******************************************************************************
 //*********************************************Anzeige der Regeln*********************************************
@@ -298,7 +307,7 @@ app.put('/dice/number',bodyParser.urlencoded({extended:true}),function(req,res){
   homeCount = 0;
   //Sind alle 4 Figuren in der Basis des gewählten Spielers, darf er 3 Mal würfeln
   for(var i=playerID*4; i<playerID*4+4; i++) {
-    if(homeArray[i] >= playerID*4 && homeArray[i] <= playerID*4+4 && homeArray[i] != 0) {
+    if(homeArray[i] != 0) {
       homeCount++;
     }
     if(homeCount == 4) {
@@ -312,7 +321,7 @@ app.put('/dice/number',bodyParser.urlencoded({extended:true}),function(req,res){
           res.end("3")
     }else if(goalArray[(playerID+1)*4-1] != 0 && goalArray[(playerID+1)*4-2] != 1 && goalArray[(playerID+1)*4-3] != 1 && goalArray[(playerID+1)*4-4] == 0 && homeCount == 1){
           res.end("3");
-          //Ansonsten darf er nur 1 Mal würfeln
+    //Ansonsten darf er nur 1 Mal würfeln
     }else {
       res.end("1");
     }
@@ -379,4 +388,3 @@ function resetGame() {
   }
 
 }
-//******************************************************************************
