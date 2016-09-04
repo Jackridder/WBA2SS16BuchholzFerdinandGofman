@@ -377,5 +377,6 @@ function resetGame() {
   for(var i=0; i<homeArray.length; i++) {
     homeArray[i] = i+1;
   }
+
 }
 //******************************************************************************
