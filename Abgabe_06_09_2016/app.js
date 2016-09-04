@@ -46,8 +46,8 @@ app.put('/spielfigur/position',bodyParser.urlencoded({extended:true}) ,function(
   //Nicht im Spielfeld oder Goal -> Figur ist in Home
   res.end("40");
 });
-// //******************************************************************************
-// //***************************************Figurposition in Goal ermitteln**************************************
+//******************************************************************************
+//***************************************Figurposition in Goal ermitteln**************************************
 app.put('/gamefield/goal/position',bodyParser.urlencoded({extended:true}), function(req,res) {
   //Figuren ID ermitteln
   var id = req.body.id;
@@ -315,6 +315,7 @@ app.put('/dice/number',bodyParser.urlencoded({extended:true}),function(req,res){
       res.end("3");
     }
   }
+
   console.log("Wie viele Figuren hat Spieler " + playerID + " in seinem Haus? Anzahl: " + homeCount);
     if(goalArray[(playerID+1)*4-1] != 0 && goalArray[(playerID+1)*4-2] == 0 && goalArray[(playerID+1)*4-3] == 0 && goalArray[(playerID+1)*4-4] == 0 && homeCount == 3){
           res.end("3");
