@@ -6,6 +6,7 @@ app.listen(3000,function(){
     console.log("Server running on 3000");
 });
 
+//TO-DO: Nur auf gelb Startfeld wenn schwarz kicken will, victim ist falsch
 app.use(jsonParser);
 
 //Anlegen globaler Variablen
@@ -235,7 +236,7 @@ app.put('/gamefield/home',bodyParser.urlencoded({extended:true}) ,function(req,r
         //Spielfigur auf erstes Feld stellen
         gamefieldArray[playerID*10] = figureID;
         homeArray[i-1] = 0;
-        console.log("Figur "+figureID+" hat Home erfolgreich verlassen, steht auf "+playerID*10);
+        console.log("Figur "+figureID+" hat Home erfolgreich verlassen, steht auf "+playerID*10 + " HomeArray: "+ i-1 +" wurde auf 0 gesetzt");
         res.end("0");
       }
       else if(lastDice !=6){
@@ -255,6 +256,9 @@ app.put('/gamefield/home',bodyParser.urlencoded({extended:true}) ,function(req,r
     res.end("2");
   }
 
+  for(var i = 0; i<16; i++){
+    console.log("Home: " + homeArray[i]);
+  }
 
 });
 //*********************************************************************************************************************
@@ -278,7 +282,7 @@ app.put('/spielzug/gewinner',function(req,res){
   else{
     res.end("0");
   }
-}
+});
 
 
 //*********************************************************************************************************************
@@ -338,14 +342,15 @@ app.put('/dice/number',bodyParser.urlencoded({extended:true}),function(req,res){
   homeCount = 0;
   //Sind alle 4 Figuren in der Basis des gewählten Spielers, darf er 3 Mal würfeln
   for(var i=playerID*4; i<playerID*4+4; i++) {
-    if(homeArray[i] >= playerID*4 && homeArray[i] <= playerID*4+3) {
+    if(homeArray[i] >= playerID*4 && homeArray[i] <= playerID*4+4 && homeArray[i] != 0) {
       homeCount++;
     }
     if(homeCount == 4) {
       res.end("3");
     }
   }
-  homeCount-=1;
+
+  //for(var i=playerID*4+1; i<=playerID*4+4;i++) {
   //TO-DO: Die For-Schleife entfernen, das erste if auch, aus dem ersten else if ein if machen und die is durch playerID*4 rechnen
   //TO-DO: homeCount gibt falschen Wert zurück 3 statt 2
   //Wo befinden sich die Figuren, wenn nicht in Home?
@@ -366,8 +371,7 @@ app.put('/dice/number',bodyParser.urlencoded({extended:true}),function(req,res){
       res.end("1");
     }
   }*/
-  console.log("Calc GoalArray: " +(((playerID+1)*4)-1));
-  console.log("HomeCount: " + homeCount);
+  console.log("Wie viele Figuren hat Spieler " + playerID + " in seinem Haus? Anzahl: " + homeCount);
     if(goalArray[(playerID+1)*4-1] != 0 && goalArray[(playerID+1)*4-2] == 0 && goalArray[(playerID+1)*4-3] == 0 && goalArray[(playerID+1)*4-4] == 0 && homeCount == 3){
           res.end("3");
     }else if(goalArray[(playerID+1)*4-1] != 0 && goalArray[(playerID+1)*4-2] != 0 && goalArray[(playerID+1)*4-3] == 0 && goalArray[(playerID+1)*4-4] == 0 && homeCount == 2){
@@ -433,7 +437,7 @@ app.get('/gamefield/reset',function (req,res){
   resetGame();
   playerCount = 0;
   lastDice = 0;
-}
+});
 
 function resetGame() {
   //Spielfeld Array: 0 = frei; 1-16 FigurenID
