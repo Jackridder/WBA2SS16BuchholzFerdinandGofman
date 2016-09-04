@@ -194,13 +194,6 @@ app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
 
   //Ist das Feld durch einen Gegner besetzt, wird eine 2 zurückgegeben
   homeArray[gamefieldArray[currentPosition+lastDice]-1] = gamefieldArray[currentPosition+lastDice];
-<<<<<<< HEAD
-
-=======
-  for(var i = 0; i < gamefieldArray.length; i++){
-    console.log("Feld: " + i + " ist besetzt durch " + gamefieldArray[i]);
-  }
->>>>>>> origin/master
   res.end("2");
 });
 
@@ -316,16 +309,12 @@ app.get('/rules',function (req,res) {
 //*********************************************************************************************************************
 app.put('/dice/number',bodyParser.urlencoded({extended:true}),function(req,res){
   var id = req.body.id;
-<<<<<<< HEAD
   var playerID = id;
   /*
   for(var i=0; i<homeArray.length;i++){
     homeArray[i]=i;
   }
   */
-=======
-  var figureID = String(id);
->>>>>>> origin/master
   //Spieler ermitteln
   homeCount = 0;
   //Sind alle 4 Figuren in der Basis des gewählten Spielers, darf er 3 Mal würfeln
