@@ -294,9 +294,7 @@ app.get('/rules',function (req,res) {
 //**************************************Anzahl der Würfelwürfe ermitteln**************************************
 app.put('/dice/number',bodyParser.urlencoded({extended:true}),function(req,res){
   var id = req.body.id;
-  var figureID = String(id);
-  //Spieler ermitteln
-  playerID = getPlayerID(figureID);
+  var playerID = String(id);
   homeCount = 0;
   //Sind alle 4 Figuren in der Basis des gewählten Spielers, darf er 3 Mal würfeln
   for(var i=playerID*4; i<playerID*4+4; i++) {
@@ -380,15 +378,15 @@ function resetGame() {
     homeArray[i] = i+1;
   }
 
-  homeArray[4] = 0;
-  homeArray[5] = 0;
-  homeArray[6] = 0;
-  homeArray[7] = 0;
-
-  goalArray[4] = 5;
-  goalArray[5] = 6;
-  goalArray[6] = 7;
-  goalArray[7] = 8;
+  // homeArray[4] = 0;
+  // homeArray[5] = 0;
+  // homeArray[6] = 0;
+  // homeArray[7] = 0;
+  //
+  // goalArray[4] = 5;
+  // goalArray[5] = 6;
+  // goalArray[6] = 7;
+  // goalArray[7] = 8;
 
 }
 //******************************************************************************

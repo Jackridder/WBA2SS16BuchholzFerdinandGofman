@@ -6,7 +6,8 @@
 		<script src="https://code.jquery.com/jquery-3.0.0.min.js"></script>
 		<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
 		<script>
-			var socket = io.connect('http://localhost:3001');
+			var url = window.location.host;
+			var socket = io.connect(url);
 			console.log(socket);
 			$( document ).ready(function() {
 				//### INIT ###
@@ -18,6 +19,8 @@
 				var posMap = {};
 				var homeMap = {};
 				var goalMap = {};
+				var currentPlayer = "";
+				var diceAmount = 3;
 
 				for(var i=0;i<=40;i++){ //PosMap Schleife des Todes
 					startX = 43;
@@ -98,9 +101,8 @@
 
 				//### BUTTON FUNCTIONS ###
 				$('#newGame').click(function(){
-					console.log("EMIT join");
-					socket.emit('join');
-					$(this).attr("disabled", true);
+					console.log("EMIT start");
+					socket.emit('start');
 				});
 				$('#btnDice').click(function(){
 					console.log("EMIT dice");
@@ -138,7 +140,6 @@
 					//var startPosY = [230,30,530,330];
 
 					console.log("GETOUT: playerId: "+player+" X "+posMap[player*10].x+" Y "+posMap[player*10].y);
-					//socket.emit('moved',{data:player,x:startPosX[playerId],y:startPosY[playerId]});
 					var figure = "#"+figure;
 					$(figure).css({"left":posMap[player*10].x,"top":posMap[player*10].y});
 
@@ -152,32 +153,27 @@
 				}
 
 				function unlockUI(id){
-					console.log("UNLOCKING UI "+id);
+					console.log("UNLOCK: UI "+id);
 					$("#btnDice").attr("disabled", false);
+				}
+				function unlockPlayer(id){
+					console.log("UNLOCK: Player "+id);
+					lockPlayers();
 					$('#players').on("click","#player"+id+" img",function(){
 						var dice = $("#lbDice").text();
-						//console.log("DELEGATE ");
 						fid = $(this).find("#player"+id+" img").prevObject[0].id;
-						//console.log(fid);
-
 
 						console.log("MOVEWISH EMIT");
 						socket.emit('movewish',{figure:fid,player:id});
-
-						if(dice == 6){
-							//movePlayer(this.id,startPosX[playerId],startPosY[playerId]);
-							//getOutPlayer(this.id);
-							//movePlayer(this.id,posMap[20].x,posMap[20].y);
-
-						}
-						//lockUI(id);
-
 					});
 				}
-				function lockUI(id){
+				function lockUI(){
 					$("#btnDice").attr("disabled", true);
-					$('#players').off("click","#player"+id+" img");
-					console.log("UI "+id+" LOCKED");
+				}
+				function lockPlayers(){
+					console.log("LOCK: All players ");
+					for(var i = 0;i<4;i++)
+						$('#players').off("click","#player"+i+" img");
 				}
 
 				function test(){
@@ -192,7 +188,19 @@
 				function kickFigure(figureID){
 					movePlayer(figureID,homeMap[figureID].x,homeMap[figureID].y);
 				}
-
+				function getPlayerText(id){
+					console.log("GetPlayerText: "+id);
+					switch(id){
+						case 0: return "<span style='color:orange;'>Gelb</span>";
+						break;
+						case 1: return "<span style='color:green'>Grün</span>";
+						break;
+						case 2: return "<span style='color:red'>Rot</span>";
+						break;
+						case 3: return "<span style='color:black'>Schwarz</span>";
+						break;
+					}
+				}
 
 				//### SOCKETS ###
 				//Update player count
@@ -207,14 +215,14 @@
 					$('#players').empty();
 					for(var j=0;j<c;j++){
 						var startX = 43+(j*450);
-						var startY = 25;
+						var startY = 27;
 						if(j==2){ // Rot
 							var startX = 43+(j*225);
-							var startY = 25+(j*225);
+							var startY = 27+(j*225);
 						}
 						if(j==3){ //Schwarz
 							var startX = 43;
-							var startY = 25+(j*150);
+							var startY = 27+(j*150);
 						}
 						$('#players').append("<div id='player"+j+"'/>");
 						//test();
@@ -236,11 +244,21 @@
 					//moveToField(3,3);
 					//getOutPlayer(1,5);
 					//movePlayer(5,homeMap[1].x,homeMap[1].y);
-
+					$("#playercount").text("Derzeit "+msg.data+" Spieler verbunden!");
 			  });
 				socket.on('diced',function (msg){
 					console.log("dice result: "+msg.data);
 					$("#lbDice").text(msg.data);
+					if(msg.data == 6){
+						diceAmount = 1;
+					}else if(diceAmount>0){
+						diceAmount--;
+					}
+					if(diceAmount<1){
+						lockUI();
+					}
+					unlockPlayer(currentPlayer);
+					console.log("diceAmount: "+diceAmount);
 				});
 				socket.on('left',function (msg){
 					console.log("LEFT");
@@ -249,24 +267,19 @@
 				});
 				socket.on('tokenadd',function (msg){
 					console.log("TOKEN: Meine Runde! Ich bin Spieler "+msg.data);
-					var currentPlayer;
-					switch(msg.data){
-						case 0: currentPlayer = "<span style='color:orange;'>Gelb</span>";
-						break;
-						case 1: currentPlayer = "<span style='color:green'>Grün</span>";
-						break;
-						case 2: currentPlayer = "<span style='color:red'>Rot</span>";
-						break;
-						case 3: currentPlayer = "<span style='color:black'>Schwarz</span>";
-						break;
-					}
-					$("#currentPlayer").html("Ich bin an der Reihe! (Spieler "+currentPlayer+" )");
+					currentPlayer = msg.data;
+					var currentPlayerText = getPlayerText(msg.data);
+					$("#currentPlayer").html("Ich bin an der Reihe! (Spieler "+currentPlayerText+" )");
 					unlockUI(msg.data);
+					lockPlayers();
+					diceAmount = msg.dices;
+					console.log("DiceAmount: "+diceAmount);
 				});
 				socket.on('tokenremove',function (msg){
 					console.log("TOKEN: Runde vorbei! Ich bin Spieler "+msg.data);
 					$("#currentPlayer").text("");
-					lockUI(msg.data);
+					lockUI();
+					lockPlayers();
 				});
 				socket.on('move',function (msg){
 					console.log("MOVE: Server: "+msg.data+" Figure: "+msg.figure);
@@ -317,15 +330,24 @@
 					console.log("KICKFIGURE: Player: "+msg.data);
 					kickFigure(msg.data);
 				});
+				socket.on('gamestart',function (msg){
+					$("#newGame").remove();
+				});
+				socket.on('gamewon',function(msg){
+					console.log("GAME WON: "+msg.data)
+					$("#winscreen").html("Spieler "+getPlayerText(msg.data)+" hat gewonnen!").fadeIn(2000);
+				});
 			});
 		</script>
 		<style>
 			.player{width:30px;height:auto;}
-			#currentPlayer{color:red;font-weight:bold; animation: blinker 2s linear infinite;}
-			#invalidmove{display:none;position:absolute;top:250px;left:140px;color:white;font-weight:bold;font-size:35px;background-color:red;padding:60px 25px;}
+			.msg{display:none;position:absolute;top:250px;left:140px;font-weight:bold;font-size:35px;padding:60px 25px;}
+			#currentPlayer{position:absolute;color:red;font-weight:bold; animation: blinker 2s linear infinite;}
+			#invalidmove{color:white;background-color:red;}
+			#winscreen{color:white;background-color:black;border:3px black solid;width:520px;left:20px;}
 
 			@keyframes blinker {
-			  50% { opacity: 0.0; }
+			  50% { opacity: 0.0;}
 			}
 		</style>
 	</head>
@@ -335,13 +357,14 @@
 		</div>
 		<img src='gamefield/' />
 		<br>
-		<input type="button" id="newGame" value="Spiel beitreten" />
+		<input type="button" id="newGame" value="Spiel starten" />
 
 		<br>
-		<input type="button" id="btnDice" value="Würfeln" /> <label for="btnDice" id="lbDice">0</label>
+		<input type="button" id="btnDice" value="Würfeln" disabled/> <label for="btnDice" id="lbDice">0</label>
 		<br>
 		<a href="rules/" target="_blank" />Regeln</a>
-		<div id="invalidmove">Ungültiger Spielzug!</div>
-
+		<div id="playercount">Derzeit 0 Spieler verbunden</div>
+		<div id="invalidmove" class="msg">Ungültiger Spielzug!</div>
+		<div id="winscreen" class="msg">Spieler Schwarz hat gewonnen!</div>
 	</body>
 </html>
