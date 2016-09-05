@@ -76,6 +76,7 @@ app.get('/spielzug/kickPlayer',function(req,res){
   console.log("Figur " + victim + " wurde von Figur " + gamefieldArray[currentPosition] + " gekickt")
   //Setzen Kickenden auf das Feld des Gekickten
   gamefieldArray[(currentPosition+lastDice)%40] = gamefieldArray[currentPosition];
+  homeArray[victim-1] = victim;
   //Alte Position auf 0 setzen
   gamefieldArray[currentPosition] = 0;
   res.end(victim.toString());
@@ -92,7 +93,7 @@ app.put('/spielzug/home/kickPlayer',bodyParser.urlencoded({extended:true}),funct
   //Setzen Kickenden auf das Feld des Gekickten
   gamefieldArray[playerID*10] = figureID;
   //Gegner zurück nach Home und eigener Spieler verlässt Home
-  homeArray[figureID-1]= 0;
+  homeArray[id-1]= 0;
   homeArray[victim-1] = victim;
   res.end(victim.toString());
 });
@@ -108,7 +109,6 @@ app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
 
   //Finde aktuelle Position von Figur
   for(var i = 0; i < gamefieldArray.length; i++){
-    console.log("Feld: " + i + " ist besetzt durch " + gamefieldArray[i]);
     if(gamefieldArray[i] == figureID){
       currentPosition = i;
       break;
@@ -150,10 +150,12 @@ app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
       return;
       console.log("0 Ende leeres Feld");
     }
+    else{
       console.log("0 Goal besetzt!");
       console.log("Inhalt des Zieldfeldes: "+goalArray[playerID*4+unusedMoves]);
       res.end("4");
     }
+  }
 
   //Hier Spieler 1-3:
   if((currentPosition<=playerID*10-1) && (currentPosition+lastDice>playerID*10-1) && playerID >= 1) {
@@ -166,12 +168,13 @@ app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
       goalArray[playerID*4+unusedMoves] = figureID;
       gamefieldArray[currentPosition] = 0;
       res.end("3");
+    }else{
+      console.log("1-3 Goal besetzt!");
+      res.end("4");
     }
-    console.log("1-3 Goal besetzt!");
-    res.end("4");
   }
   //Ist das Feld leer wird eine 0 zurückgegeben
-  if((gamefieldArray[(currentPosition+lastDice)] == 0)){
+  else if((gamefieldArray[(currentPosition+lastDice)] == 0)){
     console.log("normaler Zug");
     gamefieldArray[currentPosition+lastDice] = figureID;
     gamefieldArray[currentPosition] = 0;
@@ -183,12 +186,6 @@ app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
       console.log("Zielfeld besetzt");
       res.end("1");
     }
-  }
-
-  //Ist das Feld durch einen Gegner besetzt, wird eine 2 zurückgegeben
-  homeArray[gamefieldArray[currentPosition+lastDice]-1] = gamefieldArray[currentPosition+lastDice];
-  for(var i = 0; i < gamefieldArray.length; i++){
-    console.log("Feld: " + i + " ist besetzt durch " + gamefieldArray[i]);
   }
   res.end("2");
 });
@@ -208,7 +205,10 @@ app.put('/gamefield/home',bodyParser.urlencoded({extended:true}) ,function(req,r
         console.log("6 Gewürfelt, Startfeld frei!");
         //Spielfigur auf erstes Feld stellen
         gamefieldArray[playerID*10] = figureID;
-        homeArray[i-1] = 0;
+        homeArray[id-1] = 0;
+        for(var i=0; i<16;i++){
+          console.log("Homefeld "+i+" steht Figur "+homeArray[i]);
+        }
         console.log("Figur "+figureID+" hat Home erfolgreich verlassen, steht auf "+playerID*10);
         res.end("0");
       }
@@ -227,10 +227,6 @@ app.put('/gamefield/home',bodyParser.urlencoded({extended:true}) ,function(req,r
   else{
     console.log("Fremde Figur auf Startfeld!")
     res.end("2");
-  }
-
-  for(var i = 0; i<16; i++){
-    console.log("Home: " + homeArray[i]);
   }
 
 });
@@ -306,9 +302,15 @@ app.put('/dice/number',bodyParser.urlencoded({extended:true}),function(req,res){
   var id = req.body.id;
   var playerID = String(id);
   homeCount = 0;
+  //DEBUG:
+  // for(var i = 0; i<homeArray.length; i++){
+  //   console.log("An Homeposition "+i+ " steht Figur "+ homeArray[i]);
+  // }
   //Sind alle 4 Figuren in der Basis des gewählten Spielers, darf er 3 Mal würfeln
   for(var i=playerID*4; i<playerID*4+4; i++) {
+    console.log("Homearray: "+homeArray[i]);
     if(homeArray[i] != 0) {
+      console.log("Figur "+i+" in Home!");
       homeCount++;
     }
     if(homeCount == 4) {
@@ -368,10 +370,11 @@ function getPlayerID(id){
 }
 //******************************************************************************
 //*****************************************Zurücksetzen des Spiels********************************************
-app.delete('/gamefield/reset',function (req,res){
+app.put('/gamefield/reset',bodyParser.urlencoded({extended:true}),function (req,res){
   resetGame();
   playerCount = 0;
   lastDice = 0;
+  res.end();
 });
 
 function resetGame() {
@@ -387,4 +390,6 @@ function resetGame() {
   for(var i=0; i<homeArray.length; i++) {
     homeArray[i] = i+1;
   }
+  console.log("Server reset");
+
 }
