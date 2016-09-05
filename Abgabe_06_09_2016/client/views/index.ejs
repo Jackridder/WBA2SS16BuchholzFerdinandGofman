@@ -142,7 +142,6 @@
 				function getOutPlayer(player,figure){
 					//var startPosX = [43,345,245,545];
 					//var startPosY = [230,30,530,330];
-
 					console.log("GETOUT: playerId: "+player+" X "+posMap[player*10].x+" Y "+posMap[player*10].y);
 					var figure = "#"+figure;
 					$(figure).css({"left":posMap[player*10].x,"top":posMap[player*10].y});
@@ -208,11 +207,41 @@
 						break;
 					}
 				}
+				function getPlayerID(figID){
+					switch(parseInt(figID)){
+						case 1:
+						case 2:
+						case 3:
+						case 4:
+							return 0;
+							break;
+						case 5:
+						case 6:
+						case 7:
+						case 8:
+							return 1;
+							break;
+						case 9:
+						case 10:
+						case 11:
+						case 12:
+							return 2;
+							break;
+						case 13:
+						case 14:
+						case 15:
+						case 16:
+							return 3;
+							break;
+					}
+				}
 
 				//### SOCKETS ###
 				//Update player count
 				socket.on('players', function (msg) {
 					console.log("players: "+msg.data);
+					$("#infobox").append("<b>Spieler "+getPlayerText(msg.data-1)+" hat sich verbunden. </b><br>");
+
 					var c = msg.data;
 					var count = 0;
 
@@ -255,6 +284,8 @@
 			  });
 				socket.on('diced',function (msg){
 					console.log("dice result: "+msg.data);
+					$("#infobox").append("<b>Spieler "+getPlayerText(msg.player)+" hat eine "+msg.data+" gewürfelt.</b><br>");
+					$('#infobox').animate({scrollTop: $('#infobox').prop("scrollHeight")}, 500);
 					$("#lbDice").text(msg.data);
 					if(diceAmount>0){
 						diceAmount--;
@@ -266,6 +297,7 @@
 						lockUI();
 					}
 					console.log("diceAmount: "+diceAmount);
+
 				});
 				socket.on('left',function (msg){
 					console.log("LEFT");
@@ -276,7 +308,7 @@
 					console.log("TOKEN: Meine Runde! Ich bin Spieler "+msg.data);
 					currentPlayer = msg.data;
 					var currentPlayerText = getPlayerText(msg.data);
-					$("#currentPlayer").html("Ich bin an der Reihe! (Spieler "+currentPlayerText+" )");
+					$("#currentPlayer").html("Ich bin an der Reihe! (Spieler "+currentPlayerText+" )").css('color','blue');
 					unlockUI(msg.data);
 					lockPlayers();
 					diceAmount = msg.dices;
@@ -306,6 +338,8 @@
 					console.log("GETOUT: Player: "+msg.player+" Figure: "+msg.figure);
 					if(msg.data==true){
 						getOutPlayer(msg.player,msg.figure);
+						$("#infobox").append("<b>Spieler "+getPlayerText(msg.player)+" hat eine Figur rausgeholt</b><br>");
+
 						//moveToField(msg.figure,msg.player*10);
 					}else{
 						console.log("getout false: "+msg.data);
@@ -325,29 +359,38 @@
 					}
 				});
 				socket.on('kickfigure',function (msg){
-					console.log("KICKFIGURE: Player: "+msg.data);
+					console.log("KICKFIGURE: Figure: "+msg.data);
 					kickFigure(msg.data);
+					$("#infobox").append("<b>Spieler "+getPlayerText(msg.player)+" hat eine Figur von Spieler "+getPlayerText(getPlayerID(msg.data))+" gekickt</b><br>");
 				});
 				socket.on('gamestart',function (msg){
 					$("#newGame").remove();
+					$("#infobox").append("<hr>SPIELBEGIN<br><hr>");
 				});
 				socket.on('gamewon',function(msg){
 					console.log("GAME WON: "+msg.data)
 					$("#winscreen").html("Spieler "+getPlayerText(msg.data)+" hat gewonnen!").fadeIn(2000);
+					$("#infobox").append("Spieler "+getPlayerText(msg.data)+" hat gewonnen!<br>").fadeIn(2000);
+
 				});
 				socket.on('unlockPlayer',function(msg){
 					console.log("UNLOCKPLAYER: "+msg.data)
 					unlockPlayer(msg.data);
+				});
+				socket.on('nextRound',function(msg){
+					var currentPlayerText = getPlayerText(msg.data);
+					$("#currentPlayer").html("Spieler "+currentPlayerText+" ist an der Reihe.").css('color','gray');
+					$("#infobox").append("<hr>");
 				});
 			});
 		</script>
 		<style>
 			.player{width:30px;height:auto;}
 			.msg{display:none;position:absolute;top:250px;left:140px;font-weight:bold;font-size:35px;padding:60px 25px;}
-			#currentPlayer{position:absolute;color:red;font-weight:bold; animation: blinker 2s linear infinite;}
+			#currentPlayer{position:absolute;color:blue;font-weight:bold; animation: blinker 2s linear infinite;}
 			#invalidmove{color:white;background-color:red;}
 			#winscreen{color:white;background-color:black;border:3px black solid;width:520px;left:20px;}
-
+			#infobox{position:absolute;top:25px;left:620px;height:590px;width:290px;overflow-y:scroll;background-color:rgba(1,1,1,0.35);color:white;padding:5px;}
 			@keyframes blinker {
 			  50% { opacity: 0.0;}
 			}
@@ -358,6 +401,7 @@
 		<div id='players'>
 		</div>
 		<img src='gamefield/' />
+		<div id="infobox"></div>
 		<br>
 		<input type="button" id="newGame" value="Spiel starten" />
 

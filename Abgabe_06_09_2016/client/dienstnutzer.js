@@ -42,7 +42,7 @@ io.sockets.on('connection', function(socket) {
      request('http://localhost:3000/dice', function (error, response, body) {
        if (!error && response.statusCode == 200) {
          console.log("dice result: "+body);
-         io.emit('diced',{data:body});
+         io.emit('diced',{data:body,player:currentPlayer});
          allClients[currentPlayer].emit('unlockPlayer',{data:currentPlayer});
          lastDice = parseInt(body);
        }
@@ -50,7 +50,6 @@ io.sockets.on('connection', function(socket) {
    });
    socket.on('movewish',function(msg){ // Spieler möchte sich bewegen
      console.log("MOVEWISH: "+msg.figure);
-
      // Aktuelle Position der Figur finden:
      request.put('http://localhost:3000/spielfigur/position',{form:{id:msg.figure}}, function (error, response, pos) {
        if (!error && response.statusCode == 200) {
@@ -85,7 +84,7 @@ io.sockets.on('connection', function(socket) {
                    request.put('http://localhost:3000/spielzug/home/kickPlayer',{form:{id:msg.figure}}, function (error, response, victim) {
                      if (!error && response.statusCode == 200) {
                        console.log("MOVEWISH: kick figur: "+victim);
-                       io.emit('kickfigure',{data:victim});
+                       io.emit('kickfigure',{data:victim,player:currentPlayer});
                        io.emit('getout',{data:true,figure:msg.figure,player:msg.player});
                        nextRound();
                      }
@@ -146,9 +145,13 @@ io.sockets.on('connection', function(socket) {
                    request('http://localhost:3000/spielzug/kickPlayer', function (error, response, victim) {
                      if (!error && response.statusCode == 200) {
                        console.log("MOVEWISH: kick figure: "+victim);
-                       io.emit('kickfigure',{data:victim});
+                       io.emit('kickfigure',{data:victim,player:currentPlayer});
                        io.emit('movefield',{data:true,figure:msg.figure,position:pos});
-                       nextRound();
+                       if(lastDice==6){
+                         allClients[currentPlayer].emit('tokenadd',{data:currentPlayer,dices:1});
+                       }else{
+                         nextRound();
+                       }
                      }
                    });
                   break;
@@ -162,17 +165,27 @@ io.sockets.on('connection', function(socket) {
                          nextRound();
                          console.log("MOVEWISH: Goal false");
                        }else{
-                          request.put('http://localhost:3000/spielzug/goal',{form:{id:msg.figure}}, function (error, response, canMove) {
+                          /*request.put('http://localhost:3000/spielzug/goal',{form:{id:msg.figure}}, function (error, response, canMove) {
                             if(canMove==false){
                               io.emit('movegoal',{data:false,figure:msg.figure,position:""});
                               nextRound();
                               console.log("MOVEWISH: Goal false");
                             }else{
                               io.emit('movegoal',{data:true,figure:msg.figure,position:goalpos});
-                              nextRound();
+                              if(lastDice==6){
+                                allClients[currentPlayer].emit('tokenadd',{data:currentPlayer,dices:1});
+                              }else{
+                                nextRound();
+                              }
                               console.log("MOVEWISH: Goal true");
                             }
                           });
+                        }*/
+                        io.emit('movegoal',{data:true,figure:msg.figure,position:goalpos});
+                        if(lastDice==6){
+                          allClients[currentPlayer].emit('tokenadd',{data:currentPlayer,dices:1});
+                        }else{
+                          nextRound();
                         }
                       }else{
                         console.log("ERROR: "+error);
@@ -208,8 +221,8 @@ io.sockets.on('connection', function(socket) {
       socket.emit('left',{data:allClients.length});
       var i = allClients.indexOf(socket);
       allClients.splice(i, 1);
-
-      if(allClients.length==0){
+      console.log(allClients.length);
+      if(allClients.length<2){
         abortGame();
       }
    });
@@ -270,9 +283,15 @@ app.get('/rules',function (req,res) {
 //******************************************************************************
 
 function abortGame(){
-  request.delete('http://localhost:3000/gamefield/reset', function (error, response, body) {
+  console.log("Aborting game..")
+  request.put('http://localhost:3000/gamefield/reset', function (error, response, body) {
     if (!error && response.statusCode == 200) {
+      allClients = [];
+      currentPlayer = 0;
+      lastDice = 0;
       console.log("Game aborted");
+    }else{
+      console.log("ERR: "+error+": "+response);
     }
   });
 }
@@ -294,5 +313,6 @@ function nextRound(){
       allClients[currentPlayer].emit('tokenadd',{data:currentPlayer,dices:parseInt(body)});
     }
   });
+  io.emit('nextRound',{data:currentPlayer});
   console.log("Next Round - Next Player: "+currentPlayer);
 }
