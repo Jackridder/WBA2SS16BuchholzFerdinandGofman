@@ -369,10 +369,11 @@ function getPlayerID(id){
 }
 //******************************************************************************
 //*****************************************Zurücksetzen des Spiels********************************************
-app.delete('/gamefield/reset',function (req,res){
+app.put('/gamefield/reset',bodyParser.urlencoded({extended:true}),function (req,res){
   resetGame();
   playerCount = 0;
   lastDice = 0;
+  res.end();
 });
 
 function resetGame() {
@@ -388,4 +389,6 @@ function resetGame() {
   for(var i=0; i<homeArray.length; i++) {
     homeArray[i] = i+1;
   }
+  console.log("Server reset");
+
 }
