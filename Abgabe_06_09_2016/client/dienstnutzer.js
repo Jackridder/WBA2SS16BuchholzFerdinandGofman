@@ -86,7 +86,11 @@ io.sockets.on('connection', function(socket) {
                        console.log("MOVEWISH: kick figur: "+victim);
                        io.emit('kickfigure',{data:victim,player:currentPlayer});
                        io.emit('getout',{data:true,figure:msg.figure,player:msg.player});
-                       nextRound();
+                       if(lastDice == 6){
+                         allClients[currentPlayer].emit('tokenadd',{data:currentPlayer,dices:1});
+                       }else{
+                         nextRound();
+                       }
                      }
                    });
                    break;
@@ -179,17 +183,19 @@ io.sockets.on('connection', function(socket) {
                               }
                               console.log("MOVEWISH: Goal true");
                             }
-                          });
-                        }*/
+                          });*/
+
                         io.emit('movegoal',{data:true,figure:msg.figure,position:goalpos});
                         if(lastDice==6){
                           allClients[currentPlayer].emit('tokenadd',{data:currentPlayer,dices:1});
                         }else{
                           nextRound();
                         }
-                      }else{
-                        console.log("ERROR: "+error);
+
                       }
+                    }else{
+                      console.log("ERROR: "+error);
+                    }
                    });
                     break;
 
