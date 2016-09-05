@@ -191,10 +191,11 @@ io.sockets.on('connection', function(socket) {
                         }else{
                           nextRound();
                         }
-                        }
-                      }else{
-                        console.log("ERROR: "+error);
+
                       }
+                    }else{
+                      console.log("ERROR: "+error);
+                    }
                    });
                     break;
 
