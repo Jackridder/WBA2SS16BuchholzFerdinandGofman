@@ -339,7 +339,6 @@ app.get('/dice',function (req,res){
 //Würfelfunktion
 function dice() {
   lastDice = Math.round(Math.random() * (6 - 1) + 1);
-  //lastDice = 6;
 }
 
 app.post('/spielfigur',jsonParser,function (req,res) {
