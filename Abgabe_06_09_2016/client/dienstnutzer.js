@@ -187,6 +187,7 @@ io.sockets.on('connection', function(socket) {
                         }else{
                           nextRound();
                         }
+                      }
                       }else{
                         console.log("ERROR: "+error);
                       }

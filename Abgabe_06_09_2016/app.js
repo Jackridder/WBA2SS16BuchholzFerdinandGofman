@@ -1,3 +1,4 @@
+//TO-DO: Goal ausgeben!
 var express = require('express');
 var bodyParser = require('body-parser');
 var jsonParser = bodyParser.json();
@@ -266,13 +267,14 @@ app.put('/spielzug/goal',bodyParser.urlencoded({extended:true}) ,function(req,re
     }
   };
   //Überprüfung des Zugs von aktueller Position bis Zielposition
-  for(var i=currentGoalPosition; i<currentGoalPosition+lastDice; i++){
+  for(var i=currentGoalPosition+1; i<=currentGoalPosition+lastDice; i++){
     //Nicht frei: fehler
     if(goalArray[i] != 0){
       console.log("FALSE: CurrPos: "+currentGoalPosition+" lastDice: "+lastDice);
       res.end("false");
     }
   }
+  //Figur darf nicht über Goalgrenze hinaus
   if(currentGoalPosition+lastDice > playerID*4+3){
     res.end("false");
   }
