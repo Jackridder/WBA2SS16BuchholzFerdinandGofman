@@ -111,11 +111,11 @@ io.sockets.on('connection', function(socket) {
                  console.log("MOVEWISH GOAL ANSWER: "+goalpos+" canMove: "+canMove);
 
                  if(canMove=="false" || goalpos=="false"){
-                   io.emit('movegoal',{data:false,figure:msg.figure,position:"",player:currentPlaye});
+                   io.emit('movegoal',{data:false,figure:msg.figure,position:"",player:currentPlayer});
                    nextRound();
                    console.log("MOVEWISH: Goal false");
                  }else{
-                   io.emit('movegoal',{data:true,figure:msg.figure,position:goalpos+lastDice,player:currentPlayer});
+                   io.emit('movegoal',{data:true,figure:msg.figure,position:parseInt(goalpos)+parseInt(lastDice),player:currentPlayer});
                    nextRound();
                    console.log("MOVEWISH: Goal true");
                  }
