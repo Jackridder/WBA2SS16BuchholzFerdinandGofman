@@ -110,6 +110,7 @@ app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
   var id = req.body.id;
   var figureID = String(id);
   var playerID = getPlayerID(figureID);
+  var enterGoal = true;//Erstes Goalfeld besetzt und neuer Goaleintritt -> kein Überspringen
   console.log("SPIELZUG: Fig: "+figureID+ " Player: "+playerID);
   currentPosition = 0;
 
@@ -149,7 +150,12 @@ app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
     unusedMoves = (lastDice+currentPosition)-40; //Restliche Feldzüge berechnen nachdem Goaleintrittsfeld erreicht wurde
     //Figur in Goalarray platzieren; vorher checken ob Position besetzt
     console.log("UnusedMoves: Player 0 "+unusedMoves);
-    if((unusedMoves<4)&&(goalArray[unusedMoves] == 0)){
+    for(var i=playerID*4; i<playerID*4+unusedMoves; i++){
+      if(goalArray[i] != 0) {
+         enterGoal = false;
+      }
+    }
+    if((unusedMoves<4)&&(goalArray[unusedMoves] == 0)&&enterGoal){
       console.log("0 leeres Feld!");
       goalArray[unusedMoves] = figureID;
       gamefieldArray[currentPosition] = 0;
@@ -336,7 +342,7 @@ app.put('/dice/number',bodyParser.urlencoded({extended:true}),function(req,res){
     }else if(goalArray[(playerID+1)*4-1] != 0 && goalArray[(playerID+1)*4-2] != 0 && goalArray[(playerID+1)*4-3] == 0 && goalArray[(playerID+1)*4-4] == 0 && homeCount == 2){
           console.log("Dice Amount: 3 wennn nur die letzten beiden Felder besetzt sind");
           res.end("3")
-    }else if(goalArray[(playerID+1)*4-1] != 0 && goalArray[(playerID+1)*4-2] != 1 && goalArray[(playerID+1)*4-3] != 1 && goalArray[(playerID+1)*4-4] == 0 && homeCount == 1){
+    }else if(goalArray[(playerID+1)*4-1] != 0 && goalArray[(playerID+1)*4-2] != 0 && goalArray[(playerID+1)*4-3] != 0 && goalArray[(playerID+1)*4-4] == 0 && homeCount == 1){
           console.log("Dice Amount: 3 wenn die letzten drei Felder besetzt sind");
           res.end("3");
     //Ansonsten darf er nur 1 Mal würfeln
@@ -407,19 +413,8 @@ function resetGame() {
     homeArray[i] = i+1;
   }
   console.log("Server reset");
-  //goalArray[0] = 1;
-  //goalArray[1] = 2;
-  //goalArray[2] = 3;
-  //goalArray[3] = 4;
-
-    //homeArray[0] = 0;
-    //homeArray[1] = 0;
-    //homeArray[2] = 0;
-    //homeArray[3] = 0;
-
-    /*gamefieldArray[30] = 1;
-    gamefieldArray[31] = 2;
-    gamefieldArray[32] = 3;
-    gamefieldArray[34] = 4;*/
+  gamefieldArray[16] = 10;
+  goalArray[9] = 11;
+  lastDice = 6;
 
 }
