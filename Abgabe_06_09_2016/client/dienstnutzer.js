@@ -115,7 +115,7 @@ io.sockets.on('connection', function(socket) {
                    nextRound();
                    console.log("MOVEWISH: Goal false");
                  }else{
-                   io.emit('movegoal',{data:true,figure:msg.figure,position:goalpos+lastDice,player:currentPlaye});
+                   io.emit('movegoal',{data:true,figure:msg.figure,position:goalpos+lastDice,player:currentPlayer});
                    nextRound();
                    console.log("MOVEWISH: Goal true");
                  }
@@ -185,7 +185,7 @@ io.sockets.on('connection', function(socket) {
                             }
                           });*/
 
-                        io.emit('movegoal',{data:true,figure:msg.figure,position:goalpos;player:currentPlayer});
+                        io.emit('movegoal',{data:true,figure:msg.figure,position:goalpos,player:currentPlayer});
                         if(lastDice==6){
                           allClients[currentPlayer].emit('tokenadd',{data:currentPlayer,dices:1});
                         }else{
