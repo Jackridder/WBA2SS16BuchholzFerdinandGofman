@@ -369,8 +369,8 @@
 				});
 				socket.on('gamewon',function(msg){
 					console.log("GAME WON: "+msg.data)
-					$("#winscreen").html("Spieler "+getPlayerText(msg.data)+" hat gewonnen!").fadeIn(2000);
-					$("#infobox").append("Spieler "+getPlayerText(msg.data)+" hat gewonnen!<br>").fadeIn(2000);
+					$("#winscreen").html("Spieler "+getPlayerText(msg.data)+" hat gewonnen!").fadeIn(4000);
+					$("#infobox").append("<b>Spieler "+getPlayerText(msg.data)+" hat gewonnen!</b><br>").fadeIn(2000);
 
 				});
 				socket.on('unlockPlayer',function(msg){
@@ -385,11 +385,11 @@
 			});
 		</script>
 		<style>
-			.player{width:30px;height:auto;}
+			.player{width:30px;height:auto;transition:all 1s ease-in-out;top:0px;left:0px;}
 			.msg{display:none;position:absolute;top:250px;left:140px;font-weight:bold;font-size:35px;padding:60px 25px;}
 			#currentPlayer{position:absolute;color:blue;font-weight:bold; animation: blinker 2s linear infinite;}
 			#invalidmove{color:white;background-color:red;}
-			#winscreen{color:white;background-color:black;border:3px black solid;width:520px;left:20px;}
+			#winscreen{color:blue;background-color:white;border:3px black solid;width:520px;left:20px;}
 			#infobox{position:absolute;top:25px;left:620px;height:590px;width:290px;overflow-y:scroll;background-color:rgba(1,1,1,0.35);color:white;padding:5px;}
 			@keyframes blinker {
 			  50% { opacity: 0.0;}
