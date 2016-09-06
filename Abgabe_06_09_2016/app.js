@@ -1,4 +1,5 @@
 //TO-DO: Goal ausgeben!
+//TO-DO: letzte Figur von vorherigem Spieler gehört einem selbst
 var express = require('express');
 var bodyParser = require('body-parser');
 var jsonParser = bodyParser.json();
@@ -55,6 +56,7 @@ app.put('/gamefield/goal/position',bodyParser.urlencoded({extended:true}), funct
   var figureID = String(id);
   //Alle Goalfelder durchlaufen
   for(var i = 0; i < goalArray.length; i++){
+    console.log("Auf Goalfeld "+i+" steht Figur: "+goalArray[i]);
     //ID des Felds = Figuren ID -> Rückgabe
     if(goalArray[i] == figureID){
       res.end(i.toString());
@@ -346,7 +348,8 @@ app.get('/dice',function (req,res){
 
 //Würfelfunktion
 function dice() {
-  lastDice = Math.round(Math.random() * (6 - 1) + 1);
+  lastDice = Math.floor(Math.random() * (6 - 1 + 1)) + 1;
+  //lastDice = 6;
 }
 
 app.post('/spielfigur',jsonParser,function (req,res) {
