@@ -275,7 +275,6 @@ app.put('/spielzug/goal',bodyParser.urlencoded({extended:true}) ,function(req,re
   //Figur in Goal suchen und Position speichern
   for(var i=playerID*4; i<playerID*4+4; i++){
     if(goalArray[i]==figureID){
-      console.log("Figur gefunden: " + goalArray[i]);
       currentGoalPosition=i;
     }
   };
@@ -414,8 +413,19 @@ function resetGame() {
     homeArray[i] = i+1;
   }
   console.log("Server reset");
-  gamefieldArray[16] = 10;
-  goalArray[9] = 11;
-  lastDice = 6;
+  //goalArray[0] = 1;
+  //goalArray[1] = 2;
+  //goalArray[2] = 3;
+  //goalArray[3] = 4;
+
+    //homeArray[0] = 0;
+    //homeArray[1] = 0;
+    //homeArray[2] = 0;
+    //homeArray[3] = 0;
+
+    /*gamefieldArray[30] = 1;
+    gamefieldArray[31] = 2;
+    gamefieldArray[32] = 3;
+    gamefieldArray[34] = 4;*/
 
 }
