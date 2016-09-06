@@ -299,6 +299,14 @@ function startGame(){
 }
 
 function nextRound(){
+  request.put('http://localhost:3000/spielzug/gewinner',{form:{id:currentPlayer}}, function (error, response, body) {
+     if (!error && response.statusCode == 200) {
+       if(body != "false"){
+         console.log("Wir haben einen Gewinner: "+body);
+         io.emit('gamewon',{data:parseInt(body)});
+       }
+     }
+  });
   allClients[currentPlayer].emit('tokenremove',{data:currentPlayer});
   currentPlayer = (currentPlayer+1)%allClients.length;
   //allClients[currentPlayer].emit('tokenadd',{data:currentPlayer});
@@ -312,13 +320,6 @@ function nextRound(){
   io.emit('nextRound',{data:currentPlayer});
   console.log("Next Round - Next Player: "+currentPlayer);
   //Prüfen ob Spiel gewonnen
-  request.put('http://localhost:3000/spielzug/gewinner',{form:{id:currentPlayer}}, function (error, response, body) {
-     if (!error && response.statusCode == 200) {
-       if(body != "false"){
-         console.log("Wir haben einen Gewinner: "+body);
-         io.emit('gamewon',{data:parseInt(body)});
-       }
-     }
-  });
+
 
 }
