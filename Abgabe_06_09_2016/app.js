@@ -28,13 +28,11 @@ app.put('/spielfigur/position',bodyParser.urlencoded({extended:true}) ,function(
   var id = req.body.id;
   //Figuren ID ermitteln
   var figureID = String(id);
-  console.log("POSITION Figur:"+figureID);
   //Alle Spielfelder durchlaufen
   for(var i = 0; i < gamefieldArray.length; i++){
     console.log("Auf Spielfeld " + i + " befindet sich die Figur" + gamefieldArray[i]);
     //ID des Felds = Figuren ID -> Rückgabe
     if(gamefieldArray[i] == figureID){
-      console.log("Spieler "+figureID+" befindet sich auf "+i);
       res.end(i.toString());
     }
   }
@@ -54,19 +52,21 @@ app.put('/gamefield/goal/position',bodyParser.urlencoded({extended:true}), funct
   //Figuren ID ermitteln
   var id = req.body.id;
   var figureID = String(id);
+  var bool = false;
+
   //Alle Goalfelder durchlaufen
   for(var i = 0; i < goalArray.length; i++){
     console.log("Auf Goalfeld "+i+" steht Figur: "+goalArray[i]);
     //ID des Felds = Figuren ID -> Rückgabe
     if(goalArray[i] == figureID){
+      bool = true;
       res.end(i.toString());
     }
   }
-  //Figur nicht im Goal: Fehler
-  for(var i = 0; i < goalArray.length; i++){
-    console.log("GoalArray: " + goalArray[i]);
+  if(!bool){
+      res.end("false");
   }
-  res.end("false");
+
 });
 //******************************************************************************
 //**************************************FigurID in Zielfeld zurückgeben***************************************
@@ -124,7 +124,7 @@ app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
   if(figureID>4 && currentPosition+lastDice>39){
     console.log("Übergang! Figur: "+figureID+" Startposition: "+currentPosition+" Wurf: "+lastDice);
     unusedMoves = (lastDice+currentPosition)-40;
-    console.log("UnusedMoves: "+unusedMoves);
+    console.log("UnusedMoves: Player 1-3"+unusedMoves);
     //Zielfeld besetzt?
 
     if(gamefieldArray[unusedMoves] >= playerID*4+1  && gamefieldArray[unusedMoves] < playerID*4 ){
@@ -148,12 +148,12 @@ app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
     console.log("Für Spieler 0");
     unusedMoves = (lastDice+currentPosition)-40; //Restliche Feldzüge berechnen nachdem Goaleintrittsfeld erreicht wurde
     //Figur in Goalarray platzieren; vorher checken ob Position besetzt
-    if((unusedMoves<=4)&&(goalArray[playerID*4+unusedMoves] == 0)){
+    console.log("UnusedMoves: Player 0 "+unusedMoves);
+    if((unusedMoves<4)&&(goalArray[unusedMoves] == 0)){
       console.log("0 leeres Feld!");
-      goalArray[playerID*4+unusedMoves] = figureID;
+      goalArray[unusedMoves] = figureID;
       gamefieldArray[currentPosition] = 0;
       res.end("3");
-      return;
       console.log("0 Ende leeres Feld");
     }
     else{
@@ -238,20 +238,21 @@ app.put('/gamefield/home',bodyParser.urlencoded({extended:true}) ,function(req,r
 });
 //******************************************************************************
 //*******************************************Ermitteln des Gewinners******************************************
-app.put('/spielzug/gewinner',function(req,res){
+app.put('/spielzug/gewinner',bodyParser.urlencoded({extended:true}),function(req,res){
   var id = req.body.id;
-  var figureID = String(id);
   var winner = true;
-  playerID = getPlayerID(figureID);
+  var playerID = String(id);
 
   for(var i=playerID*4; i<playerID*4+4; i++){
     if(goalArray[i] == 0){
+      console.log("Noch kein Gewinner, da Goal nicht voll!"+i);
       winner = false;
     }
   }
   //Alle Figuren in Goal -> Übergebener Player ist gewinner
   if(winner) {
-    res.end(playerID.toString());
+    console.log("Player: " + playerID + " hat gewonnen");
+    res.end(playerID);
   }
   else{
     res.end("false");
@@ -268,6 +269,7 @@ app.put('/spielzug/goal',bodyParser.urlencoded({extended:true}) ,function(req,re
   //Figur in Goal suchen und Position speichern
   for(var i=playerID*4; i<playerID*4+4; i++){
     if(goalArray[i]==figureID){
+      console.log("Figur gefunden: " + goalArray[i]);
       currentGoalPosition=i;
     }
   };
@@ -282,6 +284,7 @@ app.put('/spielzug/goal',bodyParser.urlencoded({extended:true}) ,function(req,re
   }
   //Figur darf nicht über Goalgrenze hinaus
   if(currentGoalPosition+lastDice > playerID*4+3){
+    console.log("Figur geht über Goal hinaus");
     res.end("false");
   }
   //Bei Erfolg alte Position zurücksetzen und neue setzen
@@ -316,25 +319,29 @@ app.put('/dice/number',bodyParser.urlencoded({extended:true}),function(req,res){
   // }
   //Sind alle 4 Figuren in der Basis des gewählten Spielers, darf er 3 Mal würfeln
   for(var i=playerID*4; i<playerID*4+4; i++) {
-    console.log("Homearray: "+homeArray[i]);
     if(homeArray[i] != 0) {
       console.log("Figur "+i+" in Home!");
       homeCount++;
     }
     if(homeCount == 4) {
+      console.log("Dice Amount: 3 wenn Homecount == 4");
       res.end("3");
     }
   }
 
   console.log("Wie viele Figuren hat Spieler " + playerID + " in seinem Haus? Anzahl: " + homeCount);
     if(goalArray[(playerID+1)*4-1] != 0 && goalArray[(playerID+1)*4-2] == 0 && goalArray[(playerID+1)*4-3] == 0 && goalArray[(playerID+1)*4-4] == 0 && homeCount == 3){
+          console.log("Dice Amount: 3 wenn nur das letzte Goal Feld besetzt ist");
           res.end("3");
     }else if(goalArray[(playerID+1)*4-1] != 0 && goalArray[(playerID+1)*4-2] != 0 && goalArray[(playerID+1)*4-3] == 0 && goalArray[(playerID+1)*4-4] == 0 && homeCount == 2){
+          console.log("Dice Amount: 3 wennn nur die letzten beiden Felder besetzt sind");
           res.end("3")
     }else if(goalArray[(playerID+1)*4-1] != 0 && goalArray[(playerID+1)*4-2] != 1 && goalArray[(playerID+1)*4-3] != 1 && goalArray[(playerID+1)*4-4] == 0 && homeCount == 1){
+          console.log("Dice Amount: 3 wenn die letzten drei Felder besetzt sind");
           res.end("3");
     //Ansonsten darf er nur 1 Mal würfeln
     }else {
+      console.log("Dice Amount: 1 wenn kein Fall davor eintritt");
       res.end("1");
     }
 });
@@ -379,7 +386,7 @@ function getPlayerID(id){
 }
 //******************************************************************************
 //*****************************************Zurücksetzen des Spiels********************************************
-app.put('/gamefield/reset',bodyParser.urlencoded({extended:true}),function (req,res){
+app.put('/gamefield/reset',function (req,res){
   resetGame();
   playerCount = 0;
   lastDice = 0;
@@ -400,5 +407,9 @@ function resetGame() {
     homeArray[i] = i+1;
   }
   console.log("Server reset");
+  goalArray[0] = 1;
+  goalArray[1] = 2;
+  goalArray[2] = 3;
+  goalArray[3] = 4;
 
 }
