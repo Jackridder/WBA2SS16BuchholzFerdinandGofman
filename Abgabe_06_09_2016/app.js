@@ -275,6 +275,7 @@ app.put('/spielzug/goal',bodyParser.urlencoded({extended:true}) ,function(req,re
   };
 
   //Überprüfung des Zugs von aktueller Position bis Zielposition
+  console.log("CurrentGoalPosition + LastDice = " + (currentGoalPosition+lastDice));
   for(var i=currentGoalPosition+1; i<=currentGoalPosition+lastDice; i++){
     //Nicht frei: fehler
     if(goalArray[i] != 0){
@@ -336,7 +337,7 @@ app.put('/dice/number',bodyParser.urlencoded({extended:true}),function(req,res){
     }else if(goalArray[(playerID+1)*4-1] != 0 && goalArray[(playerID+1)*4-2] != 0 && goalArray[(playerID+1)*4-3] == 0 && goalArray[(playerID+1)*4-4] == 0 && homeCount == 2){
           console.log("Dice Amount: 3 wennn nur die letzten beiden Felder besetzt sind");
           res.end("3")
-    }else if(goalArray[(playerID+1)*4-1] != 0 && goalArray[(playerID+1)*4-2] != 1 && goalArray[(playerID+1)*4-3] != 1 && goalArray[(playerID+1)*4-4] == 0 && homeCount == 1){
+    }else if(goalArray[(playerID+1)*4-1] != 0 && goalArray[(playerID+1)*4-2] != 0 && goalArray[(playerID+1)*4-3] != 0 && goalArray[(playerID+1)*4-4] == 0 && homeCount == 1){
           console.log("Dice Amount: 3 wenn die letzten drei Felder besetzt sind");
           res.end("3");
     //Ansonsten darf er nur 1 Mal würfeln
