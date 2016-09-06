@@ -365,7 +365,7 @@
 				});
 				socket.on('gamestart',function (msg){
 					$("#newGame").remove();
-					$("#infobox").append("<hr>SPIELBEGIN<br><hr>");
+					$("#infobox").append("<hr>SPIELBEGINN<br><hr>");
 				});
 				socket.on('gamewon',function(msg){
 					console.log("GAME WON: "+msg.data)
