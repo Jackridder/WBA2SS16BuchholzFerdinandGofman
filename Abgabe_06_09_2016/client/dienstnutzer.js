@@ -110,7 +110,7 @@ io.sockets.on('connection', function(socket) {
                request.put('http://localhost:3000/spielzug/goal',{form:{id:msg.figure}}, function (error, response, canMove) {
                  console.log("MOVEWISH GOAL ANSWER: "+goalpos+" canMove: "+canMove);
 
-                 if(canMove==false){
+                 if(canMove=="false" || goalpos=="false"){
                    io.emit('movegoal',{data:false,figure:msg.figure,position:""});
                    nextRound();
                    console.log("MOVEWISH: Goal false");
@@ -164,7 +164,7 @@ io.sockets.on('connection', function(socket) {
                    request.put('http://localhost:3000/gamefield/goal/position',{form:{id:msg.figure}}, function (error, response, goalpos) {
                      if (!error && response.statusCode == 200) {
                        console.log("goalpos: "+goalpos);
-                       if(goalpos==false){
+                       if(goalpos=="false"){
                          io.emit('movegoal',{data:false,figure:msg.figure,position:""});
                          nextRound();
                          console.log("MOVEWISH: Goal false");
@@ -209,16 +209,6 @@ io.sockets.on('connection', function(socket) {
            });
          }
        }
-     });
-
-     //Prüfen ob Spiel gewonnen
-     request.put('http://localhost:3000/spielzug/gewinner',{form:{id:msg.figure}}, function (error, response, body) {
-        if (!error && response.statusCode == 200) {
-          if(body != "false"){
-            console.log("Wir haben einen Gewinner: "+body);
-            io.emit('gamewon',{data:parseInt(body)});
-          }
-        }
      });
    });
 
@@ -321,4 +311,14 @@ function nextRound(){
   });
   io.emit('nextRound',{data:currentPlayer});
   console.log("Next Round - Next Player: "+currentPlayer);
+  //Prüfen ob Spiel gewonnen
+  request.put('http://localhost:3000/spielzug/gewinner',{form:{id:currentPlayer}}, function (error, response, body) {
+     if (!error && response.statusCode == 200) {
+       if(body != "false"){
+         console.log("Wir haben einen Gewinner: "+body);
+         io.emit('gamewon',{data:parseInt(body)});
+       }
+     }
+  });
+
 }
