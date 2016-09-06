@@ -61,6 +61,9 @@ app.put('/gamefield/goal/position',bodyParser.urlencoded({extended:true}), funct
     }
   }
   //Figur nicht im Goal: Fehler
+  for(var i = 0; i < goalArray.length; i++){
+    console.log("GoalArray: " + goalArray[i]);
+  }
   res.end("false");
 });
 //******************************************************************************
@@ -182,7 +185,7 @@ app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
     res.end("0");
   }
   //Ist das Feld durch eine eigene Figur besetzt, wird eine 1 zurückgegeben
-  for(var i=playerID*4; i<playerID*4+4; i++) {
+  for(var i=playerID*4+1; i<=playerID*4+4; i++) {
     if(gamefieldArray[currentPosition+lastDice] == i){
       console.log("Zielfeld besetzt");
       res.end("1");
@@ -266,6 +269,7 @@ app.put('/spielzug/goal',bodyParser.urlencoded({extended:true}) ,function(req,re
       currentGoalPosition=i;
     }
   };
+
   //Überprüfung des Zugs von aktueller Position bis Zielposition
   for(var i=currentGoalPosition+1; i<=currentGoalPosition+lastDice; i++){
     //Nicht frei: fehler
