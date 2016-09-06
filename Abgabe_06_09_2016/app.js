@@ -407,10 +407,10 @@ function resetGame() {
     homeArray[i] = i+1;
   }
   console.log("Server reset");
-  goalArray[0] = 1;
-  goalArray[1] = 2;
-  goalArray[2] = 3;
-  goalArray[3] = 4;
+  //goalArray[0] = 1;
+  //goalArray[1] = 2;
+  //goalArray[2] = 3;
+  //goalArray[3] = 4;
 
     //homeArray[0] = 0;
     //homeArray[1] = 0;
