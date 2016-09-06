@@ -111,11 +111,11 @@ io.sockets.on('connection', function(socket) {
                  console.log("MOVEWISH GOAL ANSWER: "+goalpos+" canMove: "+canMove);
 
                  if(canMove=="false" || goalpos=="false"){
-                   io.emit('movegoal',{data:false,figure:msg.figure,position:""});
+                   io.emit('movegoal',{data:false,figure:msg.figure,position:"",player:currentPlaye});
                    nextRound();
                    console.log("MOVEWISH: Goal false");
                  }else{
-                   io.emit('movegoal',{data:true,figure:msg.figure,position:goalpos});
+                   io.emit('movegoal',{data:true,figure:msg.figure,position:goalpos+lastDice,player:currentPlaye});
                    nextRound();
                    console.log("MOVEWISH: Goal true");
                  }
@@ -165,7 +165,7 @@ io.sockets.on('connection', function(socket) {
                      if (!error && response.statusCode == 200) {
                        console.log("goalpos: "+goalpos);
                        if(goalpos=="false"){
-                         io.emit('movegoal',{data:false,figure:msg.figure,position:""});
+                         io.emit('movegoal',{data:false,figure:msg.figure,position:"",player:currentPlaye});
                          nextRound();
                          console.log("MOVEWISH: Goal false");
                        }else{
@@ -185,7 +185,7 @@ io.sockets.on('connection', function(socket) {
                             }
                           });*/
 
-                        io.emit('movegoal',{data:true,figure:msg.figure,position:goalpos});
+                        io.emit('movegoal',{data:true,figure:msg.figure,position:goalpos;player:currentPlayer});
                         if(lastDice==6){
                           allClients[currentPlayer].emit('tokenadd',{data:currentPlayer,dices:1});
                         }else{

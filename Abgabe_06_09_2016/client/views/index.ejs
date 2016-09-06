@@ -351,6 +351,8 @@
 					console.log("MOVEGOAL: Player: "+msg.player+" Figure: "+msg.figure);
 					if(msg.data==true){
 						moveToGoal(msg.figure,msg.position);
+						$("#infobox").append("<b>Spieler "+getPlayerText(msg.player)+" hat eine Figur ins Ziel gebracht!</b><br>");
+
 						//moveToField(msg.figure,msg.player*10);
 					}else{
 						console.log("movegoal false");
