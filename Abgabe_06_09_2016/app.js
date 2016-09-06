@@ -93,6 +93,7 @@ app.put('/spielzug/home/kickPlayer',bodyParser.urlencoded({extended:true}),funct
   var id = req.body.id;
   var figureID = String(id);
   var playerID = getPlayerID(figureID);
+  playerID = parseInt(playerID);
 
   //Gegnerische Figur ermitteln
   var victim = gamefieldArray[playerID*10];
@@ -110,6 +111,7 @@ app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
   var id = req.body.id;
   var figureID = String(id);
   var playerID = getPlayerID(figureID);
+  playerID = parseInt(playerID);
   var enterGoal = true;//Erstes Goalfeld besetzt und neuer Goaleintritt -> kein Überspringen
   console.log("SPIELZUG: Fig: "+figureID+ " Player: "+playerID);
   currentPosition = 0;
@@ -207,6 +209,7 @@ app.put('/gamefield/home',bodyParser.urlencoded({extended:true}) ,function(req,r
   var id = req.body.id;
   var figureID = String(id);
   playerID = getPlayerID(figureID);
+  playerID = parseInt(playerID);
   console.log(req.body);
   console.log("Spieler "+playerID+ " versucht Figur "+figureID+" aus home zu bewegen");
   //Server muss bei jedem Klick abfragen ob Zug möglich Ist
@@ -271,6 +274,7 @@ app.put('/spielzug/goal',bodyParser.urlencoded({extended:true}) ,function(req,re
   var figureID = String(id);
   var currentGoalPosition;
   playerID = getPlayerID(figureID);
+  playerID = parseInt(playerID);
 
   //Figur in Goal suchen und Position speichern
   for(var i=playerID*4; i<playerID*4+4; i++){
@@ -318,6 +322,7 @@ app.get('/rules',function (req,res) {
 app.put('/dice/number',bodyParser.urlencoded({extended:true}),function(req,res){
   var id = req.body.id;
   var playerID = String(id);
+  playerID = parseInt(playerID);
   homeCount = 0;
   //DEBUG:
   // for(var i = 0; i<homeArray.length; i++){
@@ -413,19 +418,4 @@ function resetGame() {
     homeArray[i] = i+1;
   }
   console.log("Server reset");
-  //goalArray[0] = 1;
-  //goalArray[1] = 2;
-  //goalArray[2] = 3;
-  //goalArray[3] = 4;
-
-    //homeArray[0] = 0;
-    //homeArray[1] = 0;
-    //homeArray[2] = 0;
-    //homeArray[3] = 0;
-
-    /*gamefieldArray[30] = 1;
-    gamefieldArray[31] = 2;
-    gamefieldArray[32] = 3;
-    gamefieldArray[34] = 4;*/
-
 }
