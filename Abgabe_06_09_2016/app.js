@@ -169,7 +169,7 @@ app.put('/spielzug',bodyParser.urlencoded({extended:true}),function(req,res){
     unusedMoves = lastDice - ((playerID*10-1)-currentPosition)-1; //Restliche Feldzüge berechnen nachdem Goaleintrittsfeld erreicht wurde
     //Figur in Goalarray platzieren; vorher checken ob Position besetzt
     console.log("unusedmoves: "+unusedMoves+ " playerID: "+playerID+" goalarray: "+goalArray[playerID*4+unusedMoves]);
-    if((unusedMoves<=4)&&(goalArray[playerID*4+unusedMoves] == 0)){
+    if((unusedMoves<4)&&(goalArray[playerID*4+unusedMoves] == 0)){
       console.log("1-3 leeres Feld!");
       goalArray[playerID*4+unusedMoves] = figureID;
       gamefieldArray[currentPosition] = 0;
